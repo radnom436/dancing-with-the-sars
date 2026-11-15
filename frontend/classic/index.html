@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dancing with the SARs — NISAR Earth Change Explorer</title>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Top Navigation Header -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="logo-circle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+          <path d="M2 12h20"></path>
+        </svg>
+      </div>
+      <div>
+        <h1>Dancing with the SARs</h1>
+        <p class="tagline">NASA Space Apps Challenge 2026 • Stage 1: Earth Observation Change Explorer</p>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <button id="btn-open-resources" class="btn btn-outline btn-sm">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        NASA & Partner Resources
+      </button>
+      <div class="status-badge" id="api-status">
+        <span class="status-dot"></span>
+        <span id="api-status-text">Connecting to Backend...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Explorer Layout -->
+  <main class="explorer-grid">
+    <!-- Left Sidebar: Controls & Search -->
+    <aside class="sidebar">
+      <!-- Quick Action Cards -->
+      <section class="card quick-actions">
+        <h2>Change Detection Mode</h2>
+        <p class="section-desc">Select observed satellite observations or run synthetic demo.</p>
+
+        <div class="action-buttons">
+          <button id="btn-run-real" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            Analyze Real NISAR Observation
+          </button>
+          <button id="btn-run-synthetic" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+            Run Synthetic Demo
+          </button>
+        </div>
+      </section>
+
+      <!-- ASF DAAC Live Archive Search -->
+      <section class="card archive-search">
+        <h2>Live ASF DAAC Archive Search</h2>
+        <p class="section-desc">Search real NISAR & Sentinel-1 granules from Alaska Satellite Facility.</p>
+
+        <form id="search-form">
+          <div class="form-group">
+            <label for="study-region">Study Region</label>
+            <select id="study-region" class="form-control">
+              <option value="-121.8,38.3,-121.4,38.7">Sacramento Valley, CA (Flood Basin)</option>
+              <option value="-122.5,37.5,-122.0,38.0">San Francisco Bay, CA</option>
+              <option value="-91.5,29.5,-90.5,30.5">Mississippi River Delta, LA</option>
+              <option value="custom">Custom Bounding Box</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="custom-bbox-group" style="display: none;">
+            <label for="bbox-input">Bounding Box (West, South, East, North)</label>
+            <input type="text" id="bbox-input" class="form-control" value="-121.8,38.3,-121.4,38.7">
+          </div>
+
+          <div class="form-group">
+            <label for="platform-select">SAR Satellite Platform</label>
+            <select id="platform-select" class="form-control">
+              <option value="NISAR,Sentinel-1" selected>NISAR & Sentinel-1 (Multi-Mission)</option>
+              <option value="NISAR">NISAR (NASA-ISRO L-band)</option>
+              <option value="Sentinel-1">Sentinel-1 (Copernicus C-band)</option>
+              <option value="UAVSAR">NASA UAVSAR (Airborne L-band NISAR Testbed)</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col">
+              <label for="start-date">Start Date</label>
+              <input type="date" id="start-date" class="form-control" value="2024-01-01">
+            </div>
+            <div class="form-group col">
+              <label for="end-date">End Date</label>
+              <input type="date" id="end-date" class="form-control" value="2024-03-01">
+            </div>
+          </div>
+
+          <button type="submit" id="btn-search" class="btn btn-outline">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            Search ASF Archive
+          </button>
+        </form>
+
+        <!-- Search Results List -->
+        <div id="search-results-container" class="search-results-container">
+          <div class="results-header">
+            <h3>Granules Found (<span id="results-count">0</span>)</h3>
+          </div>
+          <div id="granules-list" class="granules-list">
+            <p class="placeholder-text">Click "Search ASF Archive" to query live SAR granules.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Analysis Parameters -->
+      <section class="card parameters-card">
+        <h2>Analysis Parameters</h2>
+        <div class="form-group">
+          <div class="slider-label">
+            <label for="threshold-slider">Change Threshold (|ΔdB|)</label>
+            <span id="threshold-val">3.0 dB</span>
+          </div>
+          <input type="range" id="threshold-slider" min="1.0" max="8.0" step="0.5" value="3.0">
+          <span class="help-text">Standard heuristic: |ΔdB| &gt; 3 dB indicates significant surface change.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="pol-select">Polarization Channel</label>
+          <select id="pol-select" class="form-control">
+            <option value="HHHH" selected>HHHH (Co-pol HH - Strong flood/soil contrast)</option>
+            <option value="HVHV">HVHV (Cross-pol HV - Vegetation volume scattering)</option>
+          </select>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Center: Interactive Map & Results -->
+    <section class="map-container">
+      <!-- Mode & Verification Banner -->
+      <div id="mode-banner" class="mode-banner banner-idle">
+        <div class="banner-badge" id="banner-badge">Ready</div>
+        <div class="banner-text" id="banner-text">Select "Analyze Real NISAR Observation" or "Run Synthetic Demo" to begin.</div>
+      </div>
+
+      <!-- Leaflet Map Element -->
+      <div id="map" class="map-view"></div>
+
+      <!-- Map Legend (RdBu -10 to +10 dB) -->
+      <div class="map-legend">
+        <div class="legend-title">Backscatter Change (ΔdB)</div>
+        <div class="legend-bar"></div>
+        <div class="legend-labels">
+          <span>-10 dB (Drop: Water/Inundation)</span>
+          <span>0 dB</span>
+          <span>+10 dB (Rise: Urban/Roughness)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Sidebar: Metrics & Provenance -->
+    <aside class="sidebar-right">
+      <!-- Metrics Summary -->
+      <section class="card metrics-card">
+        <h2>Summary Metrics</h2>
+        <div class="metric-grid">
+          <div class="metric-box">
+            <div class="metric-label">Mean Change</div>
+            <div class="metric-value" id="metric-mean-db">--</div>
+            <div class="metric-unit">dB</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-label">Changed Area</div>
+            <div class="metric-value" id="metric-changed-pct">--</div>
+            <div class="metric-unit">% of valid pixels</div>
+          </div>
+        </div>
+
+        <div class="pixel-stats">
+          <div class="stat-row">
+            <span>Valid Co-registered Pixels:</span>
+            <strong id="stat-valid-pixels">--</strong>
+          </div>
+          <div class="stat-row">
+            <span>Swath Nodata Pixels Masked:</span>
+            <strong id="stat-nodata-pixels">--</strong>
+          </div>
+          <div class="stat-row">
+            <span>Data Mode:</span>
+            <strong id="stat-mode">--</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- Change Detection Formula & Physics Card -->
+      <section class="card formula-card">
+        <h2>Scientific Processing</h2>
+        <div class="formula-box">
+          <code>Δσ⁰(dB) = 10 · log₁₀(max(post, ε) / max(pre, ε))</code>
+        </div>
+        <p class="formula-explanation">
+          Calculated in linear power ($\gamma^0$). Inundation causes specular scatter away from antenna, creating characteristic backscatter drops (&lt; -3 dB).
+        </p>
+      </section>
+
+      <!-- Provenance & Limitations Panel -->
+      <section class="card provenance-card">
+        <h2>Provenance & Limitations</h2>
+        <div id="provenance-details" class="provenance-details">
+          <div class="prov-row">
+            <span class="prov-key">Mission:</span>
+            <span class="prov-val" id="prov-mission">NASA-ISRO NISAR / Copernicus Sentinel-1</span>
+          </div>
+          <div class="prov-row">
+            <span class="prov-key">Pre Observation:</span>
+            <span class="prov-val" id="prov-pre">2024-01-15 (Baseline)</span>
+          </div>
+          <div class="prov-row">
+            <span class="prov-key">Post Observation:</span>
+            <span class="prov-val" id="prov-post">2024-02-15 (Post-Event)</span>
+          </div>
+          <div class="prov-row">
+            <span class="prov-key">Spatial CRS:</span>
+            <span class="prov-val" id="prov-crs">WGS 84 (EPSG:4326)</span>
+          </div>
+        </div>
+
+        <div class="limitations-callout">
+          <strong>Scientific Disclaimer:</strong> Backscatter change indicates physical surface dielectric and roughness variation. It does not constitute standalone flood proof without hydrological ground truth. Stage 1 represents observed historical changes only; no predictive forecasting is implied.
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <!-- Resources Modal -->
+  <div id="resources-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <h2>Official NASA & Space Agency Partner Resources</h2>
+        </div>
+        <button id="btn-close-resources" class="modal-close-btn">&times;</button>
+      </div>
+
+      <div class="disclaimer-banner">
+        <strong>Official Disclaimer:</strong> NASA does not endorse any non-U.S. Government entity and is not responsible for information contained on non-U.S. Government websites. For non-U.S. Government websites, participants must comply with any data use parameters of that specific website.
+      </div>
+
+      <div class="modal-body">
+        <!-- NASA Section -->
+        <div class="resource-section">
+          <h3>NASA Data & Resources</h3>
+          <div class="resource-links-grid">
+            <a href="https://search.earthdata.nasa.gov/search" target="_blank" rel="noopener noreferrer" class="resource-link-card">
+              <div class="res-title">NASA Earthdata Search <span class="res-arrow">↗</span></div>
+              <p class="res-desc">Data discovery, search, comparison, visualization, and access across NASA's Earth science data holdings.</p>
+            </a>
+            <a href="https://search.asf.alaska.edu/" target="_blank" rel="noopener noreferrer" class="resource-link-card">
+              <div class="res-title">ASF Data Search Vertex <span class="res-arrow">↗</span></div>
+              <p class="res-desc">Alaska Satellite Facility NASA archive of SAR data supporting NASA's ESDIS project.</p>
+            </a>
+            <a href="https://nisar-docs.asf.alaska.edu/" target="_blank" rel="noopener noreferrer" class="resource-link-card">
+              <div class="res-title">NISAR Data User Guide <span class="res-arrow">↗</span></div>
+              <p class="res-desc">Comprehensive reference from ASF for accessing and working with NISAR L-band and S-band SAR products.</p>
+            </a>
+            <a href="https://www.earthdata.nasa.gov/learn/earth-observation-data-basics/remote-sensing" target="_blank" rel="noopener noreferrer" class="resource-link-card">
+              <div class="res-title">Intro to Remote Sensing <span class="res-arrow">↗</span></div>
+              <p class="res-desc">Basics about remotely-sensed data, instrument characteristics, and resolution fundamentals.</p>
+            </a>
+            <a href="https://www.earthdata.nasa.gov/learn/earth-observation-data-basics/sar" target="_blank" rel="noopener noreferrer" class="resource-link-card">
+              <div class="res-title">Intro to Synthetic Aperture Radar (SAR) <span class="res-arrow">↗</span></div>
+              <p class="res-desc">SAR data fundamentals: frequency bands, wavelength, polarization, and radar scattering mechanisms.</p>
+            </a>
+            <a href="https://appliedsciences.nasa.gov/get-involved/training" target="_blank" rel="noopener noreferrer" class="resource-link-card">
+              <div class="res-title">NASA ARSET Trainings <span class="res-arrow">↗</span></div>
+              <p class="res-desc">Hands-on trainings for disaster management, flood monitoring, and ecological forecasting using SAR.</p>
+            </a>
+            <a href="https://nisar.jpl.nasa.gov/applications/arcgis-storymaps/" target="_blank" rel="noopener noreferrer" class="resource-link-card">
+              <div class="res-title">NISAR StoryMaps <span class="res-arrow">↗</span></div>
+              <p class="res-desc">Interactive applications for floods, wildfires, land subsidence, oil slicks, and glacial dynamics.</p>
+            </a>
+            <a href="https://nisar.jpl.nasa.gov/applications/societal-benefit/" target="_blank" rel="noopener noreferrer" class="resource-link-card">
+              <div class="res-title">NISAR Applications White Papers <span class="res-arrow">↗</span></div>
+              <p class="res-desc">Brief overviews of societal benefits and applications identified by NISAR workshops.</p>
+            </a>
+            <a href="https://uavsar.jpl.nasa.gov/education/postcards.html" target="_blank" rel="noopener noreferrer" class="resource-link-card">
+              <div class="res-title">NASA UAVSAR Postcards <span class="res-arrow">↗</span></div>
+              <p class="res-desc">False color polarimetric composites of airborne L-band UAVSAR depicting Earth surface dynamics.</p>
+            </a>
+          </div>
+        </div>
+
+        <!-- CSA Section -->
+        <div class="resource-section">
+          <h3>Canadian Space Agency (CSA) Resources</h3>
+          <div class="resource-links-grid">
+            <a href="https://donnees-data.asc-csa.gc.ca/en/dataset/rcm" target="_blank" rel="noopener noreferrer" class="resource-link-card">
+              <div class="res-title">RADARSAT Constellation Mission (RCM) <span class="res-arrow">↗</span></div>
+              <p class="res-desc">Canada's trio of Earth observation satellites for maritime surveillance, disaster recovery, and ecosystem monitoring.</p>
+            </a>
+            <a href="https://github.com/asc-csa/Synthetic_Aperture_Radar_Tutorial" target="_blank" rel="noopener noreferrer" class="resource-link-card">
+              <div class="res-title">Synthetic Aperture Radar Python Tutorial <span class="res-arrow">↗</span></div>
+              <p class="res-desc">Open CSA tutorial for processing and visualizing SAR data with Python and QGIS.</p>
+            </a>
+            <a href="https://donnees-data.asc-csa.gc.ca/en/dataset/radarsat1" target="_blank" rel="noopener noreferrer" class="resource-link-card">
+              <div class="res-title">RADARSAT-1 Open Data Archive <span class="res-arrow">↗</span></div>
+              <p class="res-desc">Historical SAR archive spanning from 1995, fully open under an open government license.</p>
+            </a>
+          </div>
+        </div>
+
+        <!-- CONAE Section -->
+        <div class="resource-section">
+          <h3>National Space Activities Commission of Argentina (CONAE)</h3>
+          <div class="resource-links-grid">
+            <a href="https://catalogos.conae.gov.ar/catalogo/catalogoSatSaocomInfo.html" target="_blank" rel="noopener noreferrer" class="resource-link-card">
+              <div class="res-title">SAOCOM Catalogue (L-band SAR) <span class="res-arrow">↗</span></div>
+              <p class="res-desc">CONAE's SAOCOM 1A/1B satellite constellation catalogue and image download tutorials.</p>
+            </a>
+            <a href="https://www.argentina.gob.ar/noticias/la-informacion-saocom-cada-vez-mas-accesible" target="_blank" rel="noopener noreferrer" class="resource-link-card">
+              <div class="res-title">SAOCOM ONE CLICK Registration <span class="res-arrow">↗</span></div>
+              <p class="res-desc">Registration protocol to access SAOCOM catalogue with verified user profiles.</p>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>

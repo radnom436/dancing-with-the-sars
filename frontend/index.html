@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Interactive 3D globe exploring real Sentinel-1 / NISAR SAR acquisitions and NASA OPERA surface-water imagery.">
+<meta name="theme-color" content="#04070d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%2304070d' stroke='%235fd4ff' stroke-width='2'/%3E%3Cpath d='M4 16h24M16 4a18 18 0 010 24M16 4a18 18 0 000 24' stroke='%235fd4ff' fill='none'/%3E%3C/svg%3E">
+<title>Dancing with the SARs · 3D Earth Change Explorer</title>
+<style>
+
+:root{--bg:#04070d;--ink:#e6f1f8;--mut:#86a0b3;--acc:#5fd4ff;--glass:rgba(9,17,29,.64);--line:rgba(120,190,230,.2)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+#gl{position:fixed;inset:0;display:block;cursor:grab;touch-action:none}
+#gl:active{cursor:grabbing}
+.glass{position:fixed;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+#head{top:16px;left:16px;max-width:330px}
+h1{margin:0 0 2px;font-size:17px;letter-spacing:.02em}
+.sub{color:var(--mut);font-size:12px}
+#badge{display:inline-block;margin-top:8px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600;letter-spacing:.06em;background:rgba(255,184,64,.14);color:#ffb840;border:1px solid rgba(255,184,64,.4)}
+#badge.real{background:rgba(80,230,150,.12);color:#58e6a0;border-color:rgba(80,230,150,.4)}
+.btn{font:inherit;color:var(--ink);background:rgba(95,212,255,.1);border:1px solid var(--line);border-radius:9px;padding:7px 12px;cursor:pointer;transition:.2s}
+.btn:hover{background:rgba(95,212,255,.22)}
+.btn.on{background:var(--acc);color:#02121c;border-color:var(--acc);font-weight:600}
+#head .btn{margin:10px 6px 0 0}
+#side{top:16px;right:16px;width:min(330px,calc(100vw - 32px));opacity:0;pointer-events:none;transform:translateX(24px);transition:.5s}
+#side.show{opacity:1;pointer-events:auto;transform:none}
+#modes{display:flex;gap:6px;margin-bottom:10px}
+#modes .btn{flex:1;padding:6px 4px;font-size:12px}
+#map{width:100%;aspect-ratio:1;border-radius:10px;display:block;border:1px solid var(--line);background:#000}
+#chart{width:100%;height:96px;margin-top:10px;display:block}
+.leg{display:flex;flex-wrap:wrap;gap:4px 12px;margin:8px 0 0;font-size:11px;color:var(--mut)}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+#cap{margin:10px 0 0;font-size:12.5px}
+.note{margin:8px 0 0;font-size:11px;color:var(--mut)}
+#time{left:50%;bottom:18px;transform:translateX(-50%);width:min(640px,calc(100vw - 32px));display:flex;align-items:center;gap:14px;opacity:0;pointer-events:none;transition:.5s}
+#time.show{opacity:1;pointer-events:auto}
+#date{min-width:96px;font-variant-numeric:tabular-nums;font-weight:600}
+input[type=range]{flex:1;accent-color:var(--acc)}
+#lbl{position:fixed;pointer-events:none;font-size:12px;padding:3px 9px;border-radius:7px;background:var(--glass);border:1px solid var(--line);transform:translate(14px,-50%);white-space:nowrap}
+#hint{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);color:var(--mut);font-size:12px;transition:.5s}
+@media(max-width:760px){#side{top:auto;bottom:84px;right:16px;left:16px;width:auto;max-height:46vh;overflow:auto}#map{max-height:30vh;width:auto;margin:auto}#head{max-width:calc(100vw - 32px)}}
+
+select,.rng{font:inherit;color:var(--ink);background:rgba(95,212,255,.08);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+#pill{display:inline-block;margin-left:8px;font-size:11px;color:var(--mut)}#pill i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff6b6b;margin-right:5px}#pill.on i{background:#58e6a0}
+.row{display:flex;gap:8px;align-items:center;margin:8px 0}.row .btn{flex:1}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.kpi div{background:rgba(95,212,255,.07);border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:11px;color:var(--mut)}.kpi b{display:block;font-size:18px;color:var(--ink)}
+.bar{height:8px;border-radius:5px;background:linear-gradient(90deg,#b2182b,#f7f7f7,#2166ac);margin-top:10px}.bl{display:flex;justify-content:space-between;font-size:10px;color:var(--mut)}
+#asfl{font-size:11px;max-height:110px;overflow:auto;margin-top:6px;color:var(--mut)}#asfl div{padding:3px 0;border-bottom:1px solid var(--line)}
+.lbl{position:fixed;pointer-events:none;font-size:12px;padding:3px 9px;border-radius:7px;background:var(--glass);border:1px solid var(--line);transform:translate(14px,-50%);white-space:nowrap}
+#side{max-height:calc(100vh - 32px);overflow:auto}
+
+.kpi3{grid-template-columns:repeat(3,1fr)}
+.kpi b{font-size:16px}
+.card{margin-top:10px;background:rgba(95,212,255,.06);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:12px}
+.card h3{margin:0 0 5px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);font-weight:600}
+.card dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0}.card dt{color:var(--mut)}.card dd{margin:0;word-break:break-all}
+.card a{color:var(--acc)}
+.about{font-size:12px;color:var(--mut);margin:0 0 8px}
+.tag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:99px;border:1px solid var(--line);color:var(--mut);margin-left:6px}
+#time{flex-direction:column;align-items:stretch;gap:6px;width:min(720px,calc(100vw - 32px))}
+#time .tr{display:flex;align-items:center;gap:12px;font-size:12px}
+#time .tr label{width:38px;color:var(--mut)}
+#time .tr span{min-width:92px;font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+#load{font-size:12px;color:var(--mut);margin:8px 0}
+.dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+#fmodes{display:flex;gap:6px;margin:6px 0}#fmodes .btn{flex:1;padding:5px 2px;font-size:11px}
+#prog{font-size:11px;color:var(--mut);margin:6px 0}
+#fchart{width:100%;height:110px;display:block;margin-top:8px}
+.chk{font-size:11px;color:var(--mut);display:flex;gap:6px;align-items:center;margin:4px 0}
+.chg{color:#ff6b5e}.gain{color:#58e6a0}.warn{color:#ffb840}
+.btn:disabled{opacity:.5;cursor:wait}.btn:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+#err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;background:var(--bg);z-index:9}#err.show{display:flex}
+@media(min-width:761px){#time{left:calc(50% - 165px);width:min(720px,calc(100vw - 378px))}}   /* keep clear of the 330px side panel */
+@media(max-width:760px){#side{bottom:118px;max-height:44vh}#head{padding:10px 12px}}   /* declared last so it beats the generic #side max-height */
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head>
+<body>
+<noscript><p style="padding:24px">This explorer needs JavaScript and WebGL.</p></noscript>
+<div id="err" role="alert"><div><h1>WebGL is unavailable</h1><p class="sub">This 3D globe needs a browser with WebGL enabled. Try a current version of Chrome, Edge, Firefox or Safari, or enable hardware acceleration.</p></div></div>
+<canvas id="gl" aria-label="3D globe of study sites"></canvas>
+<div id="head" class="glass">
+  <h1>Dancing with the SARs</h1>
+  <div class="sub">Live SAR acquisition explorer · 6 sites <span id="pill"><i></i><span>connecting…</span></span></div>
+  <span id="badge" class="real">REAL DATA · ASF DAAC (LIVE)</span><br>
+  <select id="sites" aria-label="Study site"></select>
+  <button class="btn" id="goto">Fly to site</button><button class="btn" id="back" hidden>← Globe</button>
+</div>
+
+<div id="side" class="glass">
+  <h1 id="sname" style="font-size:15px;margin-bottom:4px"></h1>
+  <p class="about" id="about"></p>
+  <div id="load"></div>
+  <div id="body" hidden>
+    <canvas id="map" width="768" height="768" role="img" aria-label="Site map with satellite footprints and NASA imagery"></canvas>
+    <div class="leg" id="leg"></div>
+    <div class="card" id="anim">
+      <h3>Real-data animation · NASA GIBS</h3>
+      <div id="fmodes">
+        <button class="btn" data-m="sar">SAR backscatter</button>
+        <button class="btn on" data-m="wtr">Water</button>
+        <button class="btn" data-m="chg">Change</button>
+      </div>
+      <label class="chk"><input type="checkbox" id="bgOpt"> Optical context (MODIS true colour, same day)</label>
+      <div class="row"><button class="btn" id="loadF">Load frames for this period</button></div>
+      <div id="prog"></div>
+      <div id="fctl" hidden>
+        <div class="row"><input type="range" id="fs" aria-label="Animation frame" min="0" max="0" value="0" step="1" style="flex:1"><span id="fd" style="font-size:12px;min-width:84px;text-align:right"></span></div>
+        <div class="leg" id="fleg"></div>
+        <div id="fstat" style="margin-top:8px"></div>
+        <canvas id="fchart"></canvas>
+      </div>
+      <p class="note">Source: NASA GIBS · OPERA DSWx-S1 &amp; RTC-S1 (NASA JPL), contains modified Copernicus Sentinel data (ESA). SAR and Water modes show NASA’s rendering unmodified; Change is computed from consecutive NASA water maps on pixels valid in both. Frames use ~58 m pixels; compare only like-for-like geometry (same orbit track) for the most reliable change.</p>
+    </div>
+    <div class="kpi kpi3"><div>Acquisitions<b id="k1">–</b></div><div>Avg revisit<b id="k2">–</b></div><div>Span<b id="k3">–</b></div></div>
+    <canvas id="chart"></canvas>
+    <div class="card" id="between"></div>
+    <div class="card" id="acq"></div>
+  </div>
+  <p class="note" id="note"></p>
+</div>
+
+<div id="time" class="glass">
+  <div class="tr"><button class="btn" id="play" aria-label="Play or pause the animation">▶</button>
+    <label>From</label><input type="range" id="sa" aria-label="Period start" min="0" max="0" value="0" step="1"><span id="da"></span></div>
+  <div class="tr"><span style="min-width:36px;visibility:hidden">.</span>
+    <label>To</label><input type="range" id="sb" aria-label="Period end" min="0" max="0" value="0" step="1"><span id="db"></span></div>
+</div>
+<div id="hint">Drag to rotate · scroll to zoom · click a marker</div>
+
+<script src="vendor/three.min.js"></script>
+<script>
+const API_BASE = location.protocol==='file:' ? 'http://127.0.0.1:8000' : '';
+const TEX = 'assets/textures/';
+const D2R = Math.PI/180, $ = id => document.getElementById(id);
+const esc = v => String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeUrl = u => /^https?:\/\//i.test(u||'') ? esc(u) : '';
+const P = (lat,lon,r=1) => new THREE.Vector3(r*Math.cos(lat*D2R)*Math.sin(lon*D2R), r*Math.sin(lat*D2R), r*Math.cos(lat*D2R)*Math.cos(lon*D2R));
+const prep = s => {const [w,so,e,n]=s.bbox.split(',').map(Number); return {...s,b:{w,s:so,e,n}};};
+let SITES = [];
+
+/* ---------- renderer / scene ---------- */
+let renderer;
+try{ renderer = new THREE.WebGLRenderer({canvas:$('gl'), antialias:true}); }
+catch(e){ $('err').classList.add('show'); throw e; }
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(45, 1, .0008, 200);
+const aniso = renderer.capabilities.getMaxAnisotropy();
+const dark = () => {const t=new THREE.DataTexture(new Uint8Array([3,8,16,255]),1,1,THREE.RGBAFormat);t.needsUpdate=true;return t;};
+const loadTex = (file,u,key) => new THREE.TextureLoader().load(TEX+file, t=>{t.anisotropy=aniso;t.generateMipmaps=true;t.minFilter=THREE.LinearMipmapLinearFilter;u[key].value=t;});
+
+const SUN = new THREE.Vector3(.8,.4,.6).normalize();
+const U = {uDay:{value:dark()},uSpec:{value:dark()},uNight:{value:dark()},uSun:{value:SUN},uCam:{value:new THREE.Vector3()},uTime:{value:0}};
+loadTex('earth_atmos_2048.jpg',U,'uDay'); loadTex('earth_specular_2048.jpg',U,'uSpec'); loadTex('earth_lights_2048.png',U,'uNight');
+const earth = new THREE.Mesh(new THREE.SphereGeometry(1,192,128), new THREE.ShaderMaterial({
+  extensions:{derivatives:true}, uniforms:U,
+  vertexShader:`varying vec3 vN;varying vec3 vNV;varying vec3 vVP;
+    void main(){vN=normalize(position);vNV=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.);vVP=-mv.xyz;gl_Position=projectionMatrix*mv;}`,
+  fragmentShader:`uniform sampler2D uDay,uSpec,uNight;uniform vec3 uSun,uCam;uniform float uTime;
+    varying vec3 vN;varying vec3 vNV;varying vec3 vVP;
+    void main(){
+      float lat=asin(clamp(vN.y,-1.,1.)),lon=atan(vN.x,vN.z);
+      vec2 uv=vec2(lon/6.2831853+.5,lat/3.1415926+.5);
+      vec3 day=texture2D(uDay,uv).rgb; float spc=texture2D(uSpec,uv).r; vec3 nite=texture2D(uNight,uv).rgb;
+      float ndl=dot(vN,uSun); float dm=smoothstep(-.1,.2,ndl);
+      vec3 V=normalize(uCam-vN); vec3 Hh=normalize(uSun+V);
+      float sp=pow(max(dot(vN,Hh),0.),70.)*spc;
+      vec3 lit=day*(.05+1.12*max(ndl,0.))+vec3(1.,.93,.8)*sp*.8;
+      vec3 dim=day*.025+nite*vec3(1.25,.95,.55)*1.5;
+      vec3 col=mix(dim,lit,dm);
+      float tw=1.-smoothstep(0.,.35,ndl+.1); col+=vec3(.9,.35,.15)*tw*dm*.06;      // sunset glow
+      vec2 g=vec2(lon,lat)*57.29578/15.; vec2 f=abs(fract(g-.5)-.5)/fwidth(g);
+      float line=1.-min(min(f.x,f.y),1.);
+      float d=abs(atan(sin(lon-uTime*.35),cos(lon-uTime*.35))); float sw=exp(-d*d*9.);
+      col+=vec3(.1,.55,.8)*line*(.07+.18*sw);
+      float fr=pow(1.-abs(dot(normalize(vVP),vNV)),3.);
+      col+=vec3(.2,.6,1.)*fr*(.25+.75*dm)*.9;
+      gl_FragColor=vec4(col,1.);}`}));
+scene.add(earth);
+
+const sunLight = new THREE.DirectionalLight(0xfff2dd,1.25); sunLight.position.copy(SUN).multiplyScalar(10); scene.add(sunLight);
+scene.add(new THREE.AmbientLight(0x223344,.35));
+const clouds = new THREE.Mesh(new THREE.SphereGeometry(1.012,128,96), new THREE.MeshLambertMaterial({transparent:true,opacity:.55,depthWrite:false}));
+new THREE.TextureLoader().load(TEX+'earth_clouds_1024.png', t=>{t.anisotropy=aniso;clouds.material.map=t;clouds.material.alphaMap=t;clouds.material.needsUpdate=true;});
+scene.add(clouds);
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.15,64,48), new THREE.ShaderMaterial({
+  transparent:true, side:THREE.BackSide, blending:THREE.AdditiveBlending, depthWrite:false,
+  vertexShader:`varying vec3 vn;void main(){vn=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+  fragmentShader:`varying vec3 vn;void main(){float i=pow(max(.0,.66-dot(vn,vec3(0.,0.,1.))),3.);gl_FragColor=vec4(.25,.62,1.,1.)*i*1.7;}`})));
+{ const n=3200,a=new Float32Array(n*3),c=new Float32Array(n*3);
+  for(let i=0;i<n;i++){const u=Math.random()*2-1,t=Math.random()*6.283,r=60+Math.random()*20,s=Math.sqrt(1-u*u),k=.55+Math.random()*.45;
+    a.set([r*s*Math.cos(t),r*u,r*s*Math.sin(t)],i*3);c.set([k*(.8+Math.random()*.2),k*.9,k],i*3);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(a,3));g.setAttribute('color',new THREE.BufferAttribute(c,3));
+  scene.add(new THREE.Points(g,new THREE.PointsMaterial({vertexColors:true,size:.2,transparent:true,opacity:.9})));}
+
+/* ---------- markers (one per site) + draped scene patch ---------- */
+const mk = [], ringM = () => new THREE.MeshBasicMaterial({color:0x5fd4ff,transparent:true,side:THREE.DoubleSide,depthWrite:false});
+function buildMarkers(){
+  mk.forEach(m=>{scene.remove(m.g);m.el.remove();}); mk.length=0;
+  SITES.forEach(s=>{
+    const g=new THREE.Group(), pos=P(s.lat,s.lon,1.003), out=P(s.lat,s.lon,2);
+    const r1=new THREE.Mesh(new THREE.RingGeometry(.011,.015,48),ringM()), r2=new THREE.Mesh(new THREE.RingGeometry(.011,.014,48),ringM());
+    [r1,r2].forEach(r=>{r.position.copy(pos);r.lookAt(out);g.add(r);});
+    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([P(s.lat,s.lon,1),P(s.lat,s.lon,1.1)]),new THREE.LineBasicMaterial({color:0x5fd4ff,transparent:true,opacity:.8})));
+    const hit=new THREE.Mesh(new THREE.SphereGeometry(.05,12,8),new THREE.MeshBasicMaterial({visible:false})); hit.position.copy(pos); hit.userData.site=s; g.add(hit);
+    const el=document.createElement('div'); el.className='lbl'; el.textContent=s.name; document.body.appendChild(el);
+    scene.add(g); mk.push({g,s,r1,r2,hit,pos,el});
+  });
+  $('sites').innerHTML=SITES.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
+}
+const patch=new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({map:null,transparent:true,opacity:0,depthWrite:false,side:THREE.DoubleSide}));
+const frame=new THREE.LineLoop(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({color:0x5fd4ff,transparent:true,opacity:0}));
+scene.add(patch,frame);
+function setPatch(b){ // curved patch that follows the globe between the real lat/lon bounds
+  const n=28,pos=[],uv=[],idx=[],edge=[];
+  for(let j=0;j<=n;j++)for(let i=0;i<=n;i++){const lat=b.n+(b.s-b.n)*j/n,lon=b.w+(b.e-b.w)*i/n;
+    const p=P(lat,lon,1.0006);pos.push(p.x,p.y,p.z);uv.push(i/n,1-j/n);
+    if(j===0||i===n||j===n||i===0)edge.push([j,i,p]);}
+  for(let j=0;j<n;j++)for(let i=0;i<n;i++){const a=j*(n+1)+i,c=a+n+1;idx.push(a,c,a+1,a+1,c,c+1);}
+  patch.geometry.dispose();const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);patch.geometry=g;
+  const ring=[];for(let i=0;i<=n;i++)ring.push(P(b.n+(b.s-b.n)*0,b.w+(b.e-b.w)*i/n,1.0008));
+  for(let j=1;j<=n;j++)ring.push(P(b.n+(b.s-b.n)*j/n,b.e,1.0008));
+  for(let i=n-1;i>=0;i--)ring.push(P(b.s,b.w+(b.e-b.w)*i/n,1.0008));
+  for(let j=n-1;j>0;j--)ring.push(P(b.n+(b.s-b.n)*j/n,b.w,1.0008));
+  frame.geometry.dispose();frame.geometry=new THREE.BufferGeometry().setFromPoints(ring);
+}
+
+/* ---------- camera orbit ---------- */
+const S={yaw:60*D2R,pitch:22*D2R,dist:3.6,tgt:null,drag:false,moved:0,last:0,vy:0,vp:0,site:null};
+const placeCam=()=>{cam.position.set(S.dist*Math.cos(S.pitch)*Math.sin(S.yaw),S.dist*Math.sin(S.pitch),S.dist*Math.cos(S.pitch)*Math.cos(S.yaw));cam.lookAt(0,0,0);};
+const cvs=$('gl');
+const ptrs=new Map();let pinch=0;
+cvs.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,[e.clientX,e.clientY]);S.drag=true;S.moved=0;S.tgt=null;try{cvs.setPointerCapture(e.pointerId);}catch(_){}S.px=e.clientX;S.py=e.clientY;pinch=0;});
+cvs.addEventListener('pointermove',e=>{if(!S.drag)return;
+  if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+  if(ptrs.size>=2){const [a,b]=[...ptrs.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);
+    if(pinch>0&&d>0){S.dist=Math.max(1.002,Math.min(7,1+(S.dist-1)*pinch/d));S.tgt=null;}pinch=d;S.moved+=10;S.last=performance.now();return;}
+  const dx=e.clientX-S.px,dy=e.clientY-S.py;S.px=e.clientX;S.py=e.clientY;S.moved+=Math.abs(dx)+Math.abs(dy);
+  const k=Math.max(.00025,Math.min(S.dist-1,2)*.0045);S.vy=-dx*k;S.vp=dy*k;S.yaw+=S.vy;S.pitch=Math.max(-1.45,Math.min(1.45,S.pitch+S.vp));S.last=performance.now();});
+cvs.addEventListener('pointerup',e=>{ptrs.delete(e.pointerId);if(ptrs.size===0){S.drag=false;if(S.moved<5)pick(e);}else{pinch=0;const r=[...ptrs.values()][0];S.px=r[0];S.py=r[1];}});
+cvs.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);if(ptrs.size===0)S.drag=false;});
+cvs.addEventListener('wheel',e=>{e.preventDefault();S.dist=Math.max(1.002,Math.min(7,1+(S.dist-1)*Math.exp(e.deltaY*.0015)));S.tgt=null;S.last=performance.now();},{passive:false});
+const ray=new THREE.Raycaster(),v2=new THREE.Vector2();
+function pick(e){if(S.dist<1.3)return;v2.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(v2,cam);
+  const h=ray.intersectObjects([...mk.map(m=>m.hit),earth])[0]; if(h&&h.object.userData.site)selectSite(h.object.userData.site);}
+function flyTo(lat,lon,dist){let ty=lon*D2R;while(ty-S.yaw>Math.PI)ty-=2*Math.PI;while(ty-S.yaw<-Math.PI)ty+=2*Math.PI;S.tgt={yaw:ty,pitch:lat*D2R,dist};}
+const siteDist=b=>1.004+Math.max(b.e-b.w,b.n-b.s)*D2R*2.6;
+const PLAT={'Sentinel-1':'#5fd4ff','NISAR':'#ffb840'}, pcol=p=>PLAT[p]||'#58e6a0';
+const mapCv=$('map');
+let TL=[], ia=0, ib=0, playing=null, loadId=0;
+const D=t=>new Date(t), day=864e5;
+const fmt=t=>D(t).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'});
+const bboxCenter=b=>[(b.s+b.n)/2,(b.w+b.e)/2];
+
+function selectSite(s){
+  if(!s)return;
+  stop();resetFrames('');S.site=s;$('sites').value=s.id;$('sname').innerHTML=`${esc(s.name)}<span class="tag">${esc(s.country||'')}</span>`;
+  $('about').textContent=(s.kind?s.kind+' — ':'')+(s.about||'');setPatch(s.b);
+  $('side').classList.add('show');$('time').classList.remove('show');$('body').hidden=true;
+  $('goto').hidden=true;$('back').hidden=false;$('hint').style.opacity=0;$('note').textContent='';
+  flyTo(s.lat,s.lon,siteDist(s.b));loadTimeline(s);
+}
+function leave(){S.site=null;stop();resetFrames('');$('side').classList.remove('show');$('time').classList.remove('show');$('goto').hidden=false;$('back').hidden=true;$('hint').style.opacity=1;S.tgt={yaw:S.yaw,pitch:22*D2R,dist:3.6};}
+$('goto').onclick=()=>{if(!SITES.length){$('note').textContent='Sites are not loaded yet — is the backend running?';loadSites();return;}selectSite(SITES.find(s=>s.id===$('sites').value)||SITES[0]);};
+$('sites').onchange=()=>{if(S.site)selectSite(SITES.find(s=>s.id===$('sites').value));};
+$('back').onclick=leave;
+
+/* ---------- live timeline from the backend (ASF DAAC) ---------- */
+const api=(p,o)=>fetch(API_BASE+p,o).then(async r=>{if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.detail||('HTTP '+r.status));}return r.json();});
+async function loadTimeline(s){
+  const id=++loadId;TL=[];$('load').textContent='Querying ASF DAAC for real SAR acquisitions…';
+  try{
+    const j=await api('/api/timeline?site='+encodeURIComponent(s.id));
+    if(id!==loadId)return;
+    TL=j.acquisitions||[];
+    if(!TL.length){$('load').textContent='ASF returned no acquisitions for this site and period.';return;}
+    $('load').textContent='';$('body').hidden=false;$('time').classList.add('show');
+    ['sa','sb'].forEach(k=>{$(k).max=TL.length-1;});
+    ia=0;ib=TL.length-1;
+    const errs=Object.entries(j.errors||{});
+    $('note').textContent=`${j.count} granules from ${j.source}, fetched ${new Date(j.fetched_at).toLocaleTimeString()}.`+(errs.length?` Unavailable: ${errs.map(e=>e[0]).join(', ')}.`:'');
+    drawAll();
+  }catch(e){if(id===loadId)$('load').textContent='Could not load live SAR data: '+e.message;}
+}
+
+/* ---------- drawing ---------- */
+const mx=mapCv.getContext('2d'), mapTex=new THREE.CanvasTexture(mapCv); mapTex.anisotropy=8; patch.material.map=mapTex;patch.material.needsUpdate=true;
+function drawMap(){
+  const b=S.site.b,W=mapCv.width,X=lon=>(lon-b.w)/(b.e-b.w)*W,Y=lat=>(b.n-lat)/(b.n-b.s)*W;
+  mx.clearRect(0,0,W,W);mx.fillStyle='rgba(4,12,22,.55)';mx.fillRect(0,0,W,W);
+  const path=f=>{mx.beginPath();f.forEach(([lo,la],i)=>i?mx.lineTo(X(lo),Y(la)):mx.moveTo(X(lo),Y(la)));mx.closePath();};
+  for(let i=ia;i<=ib;i++){const a=TL[i];if(!a.footprint.length)continue;path(a.footprint);mx.fillStyle=pcol(a.platform)+'1a';mx.fill();}
+  const cur=TL[ib];
+  if(cur&&cur.footprint.length){path(cur.footprint);mx.fillStyle=pcol(cur.platform)+'55';mx.fill();mx.lineWidth=5;mx.strokeStyle=pcol(cur.platform);mx.stroke();}
+  mx.strokeStyle='rgba(255,255,255,.35)';mx.lineWidth=1;mx.setLineDash([6,6]);mx.strokeRect(1,1,W-2,W-2);mx.setLineDash([]);
+  mx.fillStyle='#fff';mx.beginPath();mx.arc(W/2,W/2,5,0,7);mx.fill();
+  mapTex.needsUpdate=true;
+}
+function drawChart(){
+  const cv=$('chart'),dpr=devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;if(!w)return;
+  cv.width=w*dpr;cv.height=h*dpr;const c=cv.getContext('2d');c.scale(dpr,dpr);
+  const t0=D(TL[0].time).getTime(),t1=D(TL[TL.length-1].time).getTime(),span=Math.max(t1-t0,1),nb=Math.min(24,Math.max(6,Math.round(span/(14*day))));
+  const bins=Array.from({length:nb},()=>({'Sentinel-1':0,'NISAR':0,o:0}));
+  TL.forEach(a=>{const k=Math.min(nb-1,Math.floor((D(a.time)-t0)/span*nb));bins[k][PLAT[a.platform]?a.platform:'o']++;});
+  const mx2=Math.max(...bins.map(x=>x['Sentinel-1']+x.NISAR+x.o))||1,bw=(w-16)/nb,base=h-16,X=t=>8+(D(t)-t0)/span*(w-16);
+  c.fillStyle='rgba(95,212,255,.12)';c.fillRect(X(TL[ia].time),0,Math.max(2,X(TL[ib].time)-X(TL[ia].time)),base);
+  bins.forEach((x,i)=>{let y=base;[['Sentinel-1',x['Sentinel-1']],['NISAR',x.NISAR],['o',x.o]].forEach(([p,n])=>{const hh=n/mx2*(base-6);y-=hh;c.fillStyle=pcol(p);c.fillRect(8+i*bw+1,y,bw-2,hh);});});
+  c.strokeStyle='#fff';c.lineWidth=1.5;[ia,ib].forEach(i=>{c.beginPath();c.moveTo(X(TL[i].time),2);c.lineTo(X(TL[i].time),base);c.stroke();});
+  c.fillStyle='#86a0b3';c.font='10px system-ui';c.fillText('acquisitions over time · '+fmt(TL[0].time)+' → '+fmt(TL[TL.length-1].time),8,h-3);
+}
+const row=(k,v,raw)=>v==null||v===''?'':`<dt>${k}</dt><dd>${raw?v:esc(v)}</dd>`;
+function drawInfo(){
+  const A=TL[ia],B=TL[ib],sel=TL.slice(ia,ib+1),n=sel.length;
+  const days=(D(B.time)-D(A.time))/day,cnt={};sel.forEach(x=>cnt[x.platform]=(cnt[x.platform]||0)+1);
+  const gaps=sel.slice(1).map((x,i)=>(D(x.time)-D(sel[i].time))/day),avg=gaps.length?gaps.reduce((p,q)=>p+q,0)/gaps.length:null;
+  const geo=[...new Set(sel.map(x=>x.direction).filter(Boolean))],paths=[...new Set(sel.map(x=>x.path).filter(v=>v!=null))];
+  const tAll=(D(TL[TL.length-1].time)-D(TL[0].time))/day,gAll=TL.length>1?tAll/(TL.length-1):null;
+  $('k1').textContent=TL.length;$('k2').textContent=gAll?gAll.toFixed(1)+' d':'–';$('k3').textContent=Math.round(tAll)+' d';
+  $('leg').innerHTML=Object.keys(PLAT).map(p=>`<span><i style="background:${PLAT[p]}"></i>${p}</span>`).join('')+'<span><i style="background:#fff"></i>site centre</span>';
+  $('between').innerHTML=`<h3>Between ${fmt(A.time)} and ${fmt(B.time)}</h3><dl>`+
+    row('Interval',days.toFixed(days%1?1:0)+' days')+row('Acquisitions',n+' ('+Object.entries(cnt).map(([k,v])=>v+' '+k).join(', ')+')')+
+    row('Mean revisit',avg!=null?avg.toFixed(1)+' days':'–')+row('Longest gap',gaps.length?Math.max(...gaps).toFixed(0)+' days':'–')+
+    row('Orbit pass',geo.join(' / ')||'–')+row('Track(s)',paths.slice(0,8).join(', ')+(paths.length>8?' …':''))+'</dl>';
+  $('acq').innerHTML=`<h3><span class="dot" style="background:${pcol(B.platform)}"></span>Acquisition at “To” date</h3><dl>`+
+    row('Time (UTC)',B.time.replace('T',' ').slice(0,19))+row('Platform',B.platform)+row('Level',B.level)+row('Beam mode',B.mode)+row('Polarization',B.pol)+
+    row('Direction',B.direction)+row('Path / frame',(B.path??'–')+' / '+(B.frame??'–'))+row('Orbit',B.orbit)+row('Size',B.size_mb?B.size_mb+' MB':null)+row('Granule',B.id)+
+    (safeUrl(B.url)?`<dt>Data</dt><dd><a href="${safeUrl(B.url)}" target="_blank" rel="noopener noreferrer">Download from ASF</a></dd>`:'')+'</dl>';
+  $('da').textContent=fmt(A.time);$('db').textContent=fmt(B.time);$('sa').value=ia;$('sb').value=ib;
+}
+function drawAll(){(FR.length&&!loading&&FR[fi])?renderFrame():drawMap();drawChart();drawInfo();}
+function invalidate(){ if(!FR.length&&!loading)return; resetFrames('Period changed — press “Load frames” to rebuild the animation.'); }
+$('sa').oninput=e=>{ia=Math.min(+e.target.value,ib);invalidate();drawAll();};
+$('sb').oninput=e=>{ib=Math.max(+e.target.value,ia);invalidate();drawAll();};
+function stop(){if(playing){clearInterval(playing);playing=null;}$('play').textContent='▶';}
+$('play').onclick=()=>{ if(playing)return stop();
+  if(loading){$('prog').textContent='Frames are still loading — playback starts once they are ready.';return;}
+  const okIdx=FR.map((f,i)=>f.ok?i:-1).filter(i=>i>=0);
+  if(!okIdx.length){$('prog').textContent='Load frames first, then press play.';return;}
+  $('play').textContent='❚❚';
+  const next=()=>{const n=okIdx.find(i=>i>fi);if(n==null){stop();return;}fi=n;showFrame();};
+  if(!okIdx.some(i=>i>fi)){fi=okIdx[0];showFrame();}   // finished: restart from the first valid frame
+  playing=setInterval(next,900);};
+
+/* ====================================================================
+   Real-data animation. Every pixel shown in "SAR backscatter" and "Water"
+   modes is NASA's own GIBS rendering (OPERA RTC-S1 / DSWx-S1), unmodified.
+   The "Change" mode is a *computed* comparison of two consecutive NASA
+   water classifications, restricted to pixels valid in both.
+   ==================================================================== */
+const SZ=768;
+let FR=[], fi=0, fmode='wtr', fToken=0, loading=false;
+function setLoading(b){loading=b;$('loadF').disabled=b;$('loadF').textContent=b?'Loading…':'Load frames for this period';}
+/* Cancel any in-flight load and clear frames; ALWAYS releases the Load button (it used to stay disabled). */
+function resetFrames(msg){fToken++;FR=[];fi=0;stop();setLoading(false);$('fctl').hidden=true;$('prog').textContent=msg||'';}
+const oc2=document.createElement('canvas');oc2.width=oc2.height=SZ;
+const octx=oc2.getContext('2d',{willReadFrequently:true});
+const gibsUrl=(layer,s,date)=>`${API_BASE}/api/gibs?layer=${layer}&bbox=${s.b.w},${s.b.s},${s.b.e},${s.b.n}&date=${date}&size=${SZ}`;
+/* Fetch one frame image. 404/422 = NASA has no product that day (final, not retried);
+   timeouts / 5xx / network errors are retried once. Never hangs: every attempt is aborted after 60 s. */
+async function loadImage(url){
+  for(let attempt=0;attempt<2;attempt++){
+    const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),60000);
+    try{
+      const r=await fetch(url,{signal:ctl.signal});
+      if(r.status===404||r.status===422)return null;
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      return await createImageBitmap(await r.blob());
+    }catch(e){ if(attempt)return null; await new Promise(r=>setTimeout(r,700)); }
+    finally{clearTimeout(t);}
+  }
+  return null;
+}
+const px=img=>{octx.clearRect(0,0,SZ,SZ);octx.drawImage(img,0,0,SZ,SZ);return octx.getImageData(0,0,SZ,SZ).data;};
+function footprintMask(acqs,b){
+  octx.clearRect(0,0,SZ,SZ);octx.fillStyle='#000';
+  acqs.forEach(a=>{if(!a.footprint||!a.footprint.length)return;octx.beginPath();
+    a.footprint.forEach(([lo,la],i)=>{const x=(lo-b.w)/(b.e-b.w)*SZ,y=(b.n-la)/(b.n-b.s)*SZ;i?octx.lineTo(x,y):octx.moveTo(x,y);});octx.closePath();octx.fill();});
+  const d=octx.getImageData(0,0,SZ,SZ).data,m=new Uint8Array(SZ*SZ);for(let k=0;k<m.length;k++)m[k]=d[k*4+3]>0?1:0;return m;
+}
+/* Classify NASA's DSWx-S1 colours: blue = open water, green = inundated vegetation (GIBS legend). */
+function classify(d){const c=new Uint8Array(SZ*SZ);
+  for(let k=0;k<c.length;k++){const o=k*4,a=d[o+3];if(a<20)continue;const r=d[o],g=d[o+1],bl=d[o+2];
+    if(bl>=r+30&&bl>=g+10)c[k]=1;else if(g>=r+30&&g>=bl+30)c[k]=2;else c[k]=3;}return c;}
+const hasData=d=>{const m=new Uint8Array(SZ*SZ);for(let k=0;k<m.length;k++)m[k]=d[k*4+3]>20?1:0;return m;};
+
+function framesForPeriod(){
+  const mp=new Map();
+  for(let i=ia;i<=ib;i++){const a=TL[i];if(!/^Sentinel-1/i.test(a.platform||''))continue;const d=a.time.slice(0,10);if(!mp.has(d))mp.set(d,[]);mp.get(d).push(a);}
+  return [...mp.entries()].map(([date,acqs])=>({date,acqs}));
+}
+async function buildFrame(f,s,useBg){
+  try{await buildFrameInner(f,s,useBg);}
+  catch(e){console.error('frame failed',f.date,e);f.ok=false;f.reason='Could not process this date ('+(e&&e.message||'error')+').';}
+}
+async function buildFrameInner(f,s,useBg){
+  const [rtc,wtr,base]=await Promise.all([loadImage(gibsUrl('rtc',s,f.date)),loadImage(gibsUrl('wtr',s,f.date)),useBg?loadImage(gibsUrl('true',s,f.date)):null]);
+  f.rtc=rtc;f.wtr=wtr;f.base=base;f.ok=false;
+  if(!rtc&&!wtr){f.reason='NASA has no OPERA product for this day yet (or the layer has no data here).';return;}
+  const fp=footprintMask(f.acqs,s.b),rA=rtc?hasData(px(rtc)):null,wD=wtr?px(wtr):null,wA=wD?hasData(wD):null;
+  f.cls=wD?classify(wD):new Uint8Array(SZ*SZ);
+  f.valid=new Uint8Array(SZ*SZ);let v=0;
+  for(let k=0;k<f.valid.length;k++){if(fp[k]&&((rA&&rA[k])||(wA&&wA[k]))){f.valid[k]=1;v++;}}
+  if(!v){f.reason='Images returned, but no valid SAR pixels inside the acquisition footprint.';return;}
+  const b=s.b,kmLat=(b.n-b.s)*111.32,kmLon=(b.e-b.w)*111.32*Math.cos((b.n+b.s)/2*D2R);f.pxKm2=kmLat*kmLon/(SZ*SZ);
+  let w1=0,w2=0;for(let k=0;k<f.valid.length;k++)if(f.valid[k]){if(f.cls[k]===1)w1++;else if(f.cls[k]===2)w2++;}
+  f.cover=v/(SZ*SZ);f.open=w1*f.pxKm2;f.iv=w2*f.pxKm2;f.water=f.open+f.iv;f.validKm2=v*f.pxKm2;f.waterPct=(w1+w2)/v*100;f.hasWtr=!!wtr;f.ok=true;
+}
+function computeChanges(){
+  let prev=null;
+  FR.forEach(f=>{f.chg=null;if(!f.ok||!f.hasWtr)return;
+    if(prev){const n=SZ*SZ,cc=new Uint8Array(n);let nw=0,lo=0,pe=0,cm=0;
+      for(let k=0;k<n;k++){if(!(f.valid[k]&&prev.valid[k]))continue;cm++;const a=prev.cls[k]===1||prev.cls[k]===2,b=f.cls[k]===1||f.cls[k]===2;
+        if(b&&!a){cc[k]=1;nw++;}else if(a&&!b){cc[k]=2;lo++;}else if(a&&b){cc[k]=3;pe++;}}
+      f.chg={cc,prevDate:prev.date,days:(D(f.date)-D(prev.date))/day,newKm2:nw*f.pxKm2,lostKm2:lo*f.pxKm2,persistKm2:pe*f.pxKm2,commonKm2:cm*f.pxKm2,net:(nw-lo)*f.pxKm2};}
+    if(f.cover>=.5)prev=f;});
+}
+async function loadFrames(){
+  const s=S.site;if(!s||!TL.length||loading)return;stop();
+  let list=framesForPeriod();
+  if(!list.length){$('prog').textContent='No Sentinel-1 acquisitions in this period — widen From/To.';return;}
+  let cut='';if(list.length>40){cut=` (showing the latest 40 of ${list.length}; narrow the period for the rest)`;list=list.slice(-40);}
+  const tok=++fToken,useBg=$('bgOpt').checked;FR=list;fi=0;setLoading(true);$('fctl').hidden=true;
+  let done=0;const total=list.length,q=[...list];
+  $('prog').textContent=`Fetching NASA imagery… 0/${total}`+cut;
+  try{
+    const worker=async()=>{while(q.length&&tok===fToken){const f=q.shift();await buildFrame(f,s,useBg);if(tok!==fToken)return;done++;$('prog').textContent=`Fetching NASA imagery… ${done}/${total}`+cut;}};
+    await Promise.all([worker(),worker(),worker(),worker()]);
+    if(tok!==fToken)return;                 // superseded: resetFrames() already released the button
+    computeChanges();
+    const ok=FR.filter(f=>f.ok).length;
+    $('prog').textContent=`${ok} of ${total} dates have NASA SAR data`+cut+'.';
+    if(ok){$('fs').max=FR.length-1;fi=Math.max(0,FR.findIndex(f=>f.ok));$('fctl').hidden=false;showFrame();}
+  }catch(e){
+    console.error(e);if(tok===fToken)$('prog').textContent='Frame loading failed: '+(e&&e.message||e);
+  }finally{ if(tok===fToken)setLoading(false); }
+}
+$('loadF').onclick=loadFrames;
+$('fs').oninput=e=>{stop();fi=+e.target.value;showFrame();};
+document.querySelectorAll('#fmodes .btn').forEach(b=>b.onclick=()=>{document.querySelectorAll('#fmodes .btn').forEach(x=>x.classList.remove('on'));b.classList.add('on');fmode=b.dataset.m;if(FR.length)showFrame();});
+$('bgOpt').onchange=()=>{if(FR.length)$('prog').textContent='Optical context changed — press “Load frames” to apply.';};
+
+function renderFrame(){
+  const f=FR[fi],W=SZ;if(mapCv.width!==W){mapCv.width=mapCv.height=W;}
+  mx.clearRect(0,0,W,W);mx.fillStyle='#050b14';mx.fillRect(0,0,W,W);
+  if(!f||!f.ok){mx.fillStyle='#86a0b3';mx.font='22px system-ui';mx.textAlign='center';mx.fillText('No NASA SAR data for this date',W/2,W/2);mx.textAlign='start';mapTex.needsUpdate=true;return;}
+  if(fmode==='sar'){if(f.rtc)mx.drawImage(f.rtc,0,0,W,W);}
+  else if(fmode==='wtr'){if(f.base)mx.drawImage(f.base,0,0,W,W);if(f.wtr)mx.drawImage(f.wtr,0,0,W,W);}
+  else{
+    if(f.base){mx.globalAlpha=.55;mx.drawImage(f.base,0,0,W,W);mx.globalAlpha=1;}
+    if(f.chg){const id=octx.createImageData(W,W),d=id.data,cc=f.chg.cc;
+      for(let k=0;k<cc.length;k++){const c=cc[k];if(!c)continue;const o=k*4;
+        if(c===1){d[o]=255;d[o+1]=59;d[o+2]=48;d[o+3]=235;}else if(c===2){d[o]=255;d[o+1]=210;d[o+2]=63;d[o+3]=235;}else{d[o]=58;d[o+1]=160;d[o+2]=255;d[o+3]=130;}}
+      octx.putImageData(id,0,0);mx.drawImage(oc2,0,0);}
+    else{mx.fillStyle='#86a0b3';mx.font='20px system-ui';mx.textAlign='center';mx.fillText('First valid date — nothing earlier to compare',W/2,W/2);mx.textAlign='start';}
+  }
+  mx.strokeStyle='rgba(255,255,255,.35)';mx.setLineDash([8,8]);mx.strokeRect(1,1,W-2,W-2);mx.setLineDash([]);
+  mapTex.needsUpdate=true;
+}
+const LEGF={sar:[['#9aa7b4','Backscatter (NASA RTC-S1 false colour)']],wtr:[['#1648ff','Open water'],['#27c25a','Inundated vegetation'],['#aab4bd','Masked']],chg:[['#ff3b30','New water'],['#ffd23f','Water lost'],['#3aa0ff','Unchanged water']]};
+const km=v=>v>=100?v.toFixed(0):v.toFixed(1);
+function showFrame(){
+  const f=FR[fi];if(!f)return;$('fs').value=fi;$('fd').textContent=fmt(f.date);
+  $('fleg').innerHTML=LEGF[fmode].map(l=>`<span><i style="background:${l[0]}"></i>${l[1]}</span>`).join('');
+  const sensors=[...new Set(f.acqs.map(a=>`${a.platform||'S1'} ${(a.direction||'').slice(0,4).toLowerCase()||''} · track ${a.path??'–'}`))].map(esc).join('<br>');
+  let h=`<dl>${row('Date',f.date)}${row('Sentinel-1 pass',sensors,1)}`;
+  if(!f.ok){h+=row('Status',`<span class="warn">${esc(f.reason||'No data')}</span>`,1)+'</dl>';}
+  else{
+    h+=row('Data coverage',(f.cover*100).toFixed(0)+'% of site'+(f.cover<.8?' <span class="warn">(partial swath)</span>':''),1)+
+       row('Open water',km(f.open)+' km²')+row('Inundated veg.',km(f.iv)+' km²')+row('Water of valid area',f.waterPct.toFixed(1)+'%');
+    if(f.chg){const c=f.chg,pct=c.commonKm2?c.net/c.commonKm2*100:0;
+      h+=row('Since '+c.prevDate,`${c.days.toFixed(0)} days`)+row('New water',`<span class="chg">+${km(c.newKm2)} km²</span>`,1)+row('Water lost',`<span class="gain">−${km(c.lostKm2)} km²</span>`,1)+
+         row('Net change',`${c.net>=0?'+':'−'}${km(Math.abs(c.net))} km² (${pct>=0?'+':'−'}${Math.abs(pct).toFixed(1)}% of compared area)`);}
+    h+='</dl>';
+  }
+  $('fstat').innerHTML=h;drawFChart();renderFrame();
+}
+function drawFChart(){
+  const cv=$('fchart'),dpr=devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;if(!w||!FR.length)return;
+  cv.width=w*dpr;cv.height=h*dpr;const c=cv.getContext('2d');c.scale(dpr,dpr);
+  const t0=D(FR[0].date).getTime(),t1=D(FR[FR.length-1].date).getTime(),sp=Math.max(t1-t0,1),X=t=>14+(D(t)-t0)/sp*(w-28);
+  const pts=FR.filter(f=>f.ok&&f.hasWtr),mx2=Math.max(...pts.map(f=>f.water),1)*1.15,base=h-20,Y=v=>base-v/mx2*(base-8);
+  c.strokeStyle='rgba(120,190,230,.2)';c.beginPath();c.moveTo(8,base);c.lineTo(w-8,base);c.stroke();
+  c.strokeStyle='#5fd4ff';c.lineWidth=2;c.beginPath();pts.forEach((f,i)=>i?c.lineTo(X(f.date),Y(f.water)):c.moveTo(X(f.date),Y(f.water)));c.stroke();
+  pts.forEach(f=>{c.beginPath();c.arc(X(f.date),Y(f.water),3.5,0,7);if(f.cover>=.8){c.fillStyle='#5fd4ff';c.fill();}else{c.strokeStyle='#ffb840';c.lineWidth=1.5;c.stroke();}});
+  const cur=FR[fi];c.strokeStyle='rgba(255,255,255,.6)';c.lineWidth=1;c.beginPath();c.moveTo(X(cur.date),2);c.lineTo(X(cur.date),base);c.stroke();
+  c.fillStyle='#86a0b3';c.font='10px system-ui';c.fillText('surface water km² (open + inundated veg.) · hollow = partial swath',8,h-5);
+  c.fillText(Math.round(mx2/1.15)+' km²',w-52,12);
+}
+addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();if(S.site&&TL.length){drawChart();if(FR.length)drawFChart();}});
+
+api('/api/health').then(h=>{$('pill').className='on';$('pill').lastChild.textContent='backend live'+(h.earthdata_token_configured?' · Earthdata':'');}).catch(()=>{$('pill').lastChild.textContent='backend offline';$('note').textContent='Start the backend (run.sh) so live SAR data can load.';});
+let siteTries=0;
+function loadSites(){api('/api/sites').then(j=>{if(Array.isArray(j)&&j.length){SITES=j.map(prep);buildMarkers();$('note').textContent='';}})
+  .catch(()=>{if(++siteTries<6)setTimeout(loadSites,2000*siteTries);else $('note').textContent='Could not load study sites. Start the backend (run.sh / run.bat) and reload.';});}
+loadSites();
+
+/* ---------- loop ---------- */
+const clock=new THREE.Clock(),tmp=new THREE.Vector3(),REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function frameLoop(){
+  requestAnimationFrame(frameLoop);   // schedule first: an error below must never freeze the globe
+  try{ tick(); }catch(e){ if(!frameLoop.warned){frameLoop.warned=1;console.error('render error',e);} }
+}
+function tick(){
+  const t=clock.getElapsedTime();U.uTime.value=t;U.uCam.value.copy(cam.position).normalize();clouds.rotation.y=t*.004;
+  const pulse=(t%2)/2;mk.forEach(m=>{m.r2.scale.setScalar(1+pulse*3.2);m.r2.material.opacity=.7*(1-pulse);m.r1.material.opacity=.9;});
+  if(S.tgt){const k=.05;S.yaw+=(S.tgt.yaw-S.yaw)*k;S.pitch+=(S.tgt.pitch-S.pitch)*k;S.dist=1+(S.dist-1)*Math.pow((S.tgt.dist-1)/(S.dist-1),k);
+    if(Math.abs(S.tgt.yaw-S.yaw)+Math.abs(S.tgt.pitch-S.pitch)+Math.abs(S.tgt.dist-S.dist)<.0005)S.tgt=null;}
+  else if(!S.drag){if(Math.abs(S.vy)>1e-6){S.yaw+=S.vy;S.pitch=Math.max(-1.45,Math.min(1.45,S.pitch+S.vp));S.vy*=.94;S.vp*=.94;}
+    else if(!S.site&&!REDUCED&&performance.now()-S.last>4000)S.yaw+=.0012;}
+  const show=S.site?Math.max(0,Math.min(1,(1.12-S.dist)/.06)):0;patch.material.opacity=show*.95;frame.material.opacity=S.site?Math.min(1,(1.6-S.dist)/.3):0;
+  if(!isFinite(S.yaw)||!isFinite(S.pitch)||!isFinite(S.dist)){S.yaw=60*D2R;S.pitch=22*D2R;S.dist=3.6;S.tgt=null;S.vy=S.vp=0;}
+  placeCam();renderer.render(scene,cam);
+  mk.forEach(m=>{tmp.copy(m.pos).project(cam);const f=m.pos.clone().normalize().dot(cam.position.clone().normalize())>.2;
+    m.el.hidden=!f||S.dist<1.4||!!S.site;m.el.style.left=((tmp.x+1)/2*innerWidth)+'px';m.el.style.top=((1-tmp.y)/2*innerHeight)+'px';});
+}
+buildMarkers();dispatchEvent(new Event('resize'));frameLoop();
+</script>
+</body></html>
