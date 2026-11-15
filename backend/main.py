@@ -8,6 +8,8 @@ GET  /api/sites     → the six study sites
 GET  /api/timeline  → live SAR acquisitions (ASF DAAC) for one site
 GET  /api/gibs      → unmodified NASA GIBS imagery for one site/day (PNG)
 GET  /api/search    → raw GeoJSON search against ASF DAAC
+POST /api/forecast  → start a surface-water pattern + forecast job (real NASA OPERA data)
+GET  /api/forecast/{job} → poll a job (progress, then result)
 POST /api/analyze   → SAR change detection on HDF5 pairs + overlay bounds
 """
 
@@ -26,6 +28,7 @@ from pydantic import BaseModel, Field
 
 from asf_client import search_nisar, site_timeline  # also loads .env
 from gibs_client import fetch_gibs_png, LAYERS as GIBS_LAYERS
+from forecast import start_job, job_status
 from sar_processor import (
     compute_change_detection,
     generate_synthetic_sar_pair,
@@ -33,7 +36,7 @@ from sar_processor import (
 )
 
 log = logging.getLogger("sars")
-VERSION = "0.5.0"
+VERSION = "0.6.2"
 
 app = FastAPI(
     title="Dancing with the SARs",
@@ -229,6 +232,32 @@ def search(
         platform=platform,
     )
     return geojson
+
+
+@app.post("/api/forecast")
+def forecast_start(
+    site: str = Query(..., description="Site id from /api/sites"),
+    lookback_days: int = Query(default=730, ge=180, le=1095, description="History to learn from (days)"),
+    horizon_days: int = Query(default=96, ge=12, le=365, description="How far ahead to forecast (days)"),
+    grid: int = Query(default=256, ge=96, le=384, description="Analysis grid (pixels per side)"),
+    max_frames: int = Query(default=80, ge=12, le=120, description="Max Sentinel-1 dates to fetch"),
+):
+    """Start a background job: fetch real OPERA water/backscatter history from NASA GIBS, mine
+    per-pixel patterns and forecast the future surface. Poll GET /api/forecast/{job}."""
+    s = next((x for x in SITES if x["id"] == site), None)
+    if s is None:
+        raise HTTPException(status_code=404, detail="Unknown site id.")
+    return start_job(s, lookback_days, horizon_days, grid, max_frames)
+
+
+@app.get("/api/forecast/{job}")
+def forecast_status(job: str):
+    j = job_status(job)
+    if j is None:
+        raise HTTPException(status_code=404, detail="Unknown or expired forecast job.")
+    if j["state"] == "error":
+        raise HTTPException(status_code=j.get("status") or 500, detail=j.get("error") or "Forecast failed.")
+    return j
 
 
 @app.post("/api/analyze")

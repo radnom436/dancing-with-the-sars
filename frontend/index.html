@@ -71,6 +71,51 @@ select,.rng{font:inherit;color:var(--ink);background:rgba(95,212,255,.08);border
 .chg{color:#ff6b5e}.gain{color:#58e6a0}.warn{color:#ffb840}
 .btn:disabled{opacity:.5;cursor:wait}.btn:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 #err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;background:var(--bg);z-index:9}#err.show{display:flex}
+
+#fcmodes{display:flex;gap:6px;margin:6px 0}#fcmodes .btn{flex:1;padding:5px 2px;font-size:11px}
+.tbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:4px}.tbl td,.tbl th{padding:2px 4px;border-bottom:1px solid var(--line);text-align:right;font-weight:400}
+.tbl th{color:var(--mut)}.tbl th:first-child,.tbl td:first-child{text-align:left}.tbl tr.best td{color:var(--acc);font-weight:600}
+.pill2{display:inline-block;font-size:10px;font-weight:600;padding:1px 8px;border-radius:99px;letter-spacing:.04em}
+.pill2.ok{background:rgba(80,230,150,.12);color:#58e6a0;border:1px solid rgba(80,230,150,.4)}.pill2.lo{background:rgba(255,184,64,.14);color:#ffb840;border:1px solid rgba(255,184,64,.4)}
+
+/* ===== v0.6.1 visual refresh + time-lapse theatre ===== */
+:root{--glass:rgba(8,15,27,.74)}
+.glass{box-shadow:0 12px 44px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.05);border-radius:18px}
+.btn{border-radius:11px;font-weight:500;letter-spacing:.01em}.btn:hover{transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,#5fd4ff,#7a8cff);color:#04101c;border-color:transparent;font-weight:650;box-shadow:0 6px 22px rgba(95,212,255,.28)}.btn.primary:hover{filter:brightness(1.09)}
+.card{background:linear-gradient(180deg,rgba(95,212,255,.08),rgba(95,212,255,.025));border-radius:14px;padding:12px 14px}
+#fc{border-color:rgba(255,160,70,.38);background:linear-gradient(180deg,rgba(255,150,60,.1),rgba(95,212,255,.025))}
+#fc h3{color:#ffb070;font-size:13.5px;letter-spacing:.01em;text-transform:none}
+.pbar{height:6px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden;margin:8px 0}.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#5fd4ff,#ffb070);transition:width .6s}
+.pbar.ind i{width:38%;animation:ind 1.1s ease-in-out infinite alternate}@keyframes ind{to{margin-left:62%}}
+ul.plain{margin:8px 0;padding-left:18px}ul.plain li{margin:6px 0;font-size:12.5px;line-height:1.5}
+.trust{font-size:12.5px;line-height:1.5;margin:8px 0}.trust .pill2{margin-right:6px}
+details summary{cursor:pointer;color:var(--mut);font-size:11.5px;margin-top:8px}
+#th{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:radial-gradient(circle at 28% 18%,rgba(12,34,56,.93),rgba(2,5,10,.975));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);opacity:0;transition:opacity .5s ease}
+#th.show{display:flex}#th.vis{opacity:1}
+.thbox{display:flex;gap:26px;align-items:center;max-width:96vw;max-height:98vh;padding:14px;transform:scale(.97);transition:transform .6s cubic-bezier(.2,.8,.2,1)}#th.vis .thbox{transform:none}
+#tc{border-radius:20px;box-shadow:0 0 0 1px var(--line),0 30px 90px rgba(0,0,0,.65),0 0 70px rgba(95,212,255,.14);background:#050b14;display:block;flex:none}
+.thside{width:330px;max-height:94vh;overflow:auto;display:flex;flex-direction:column;gap:11px;padding-right:4px}
+.thhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.bigdate{font-size:21px;font-weight:650;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.chip{display:inline-block;padding:4px 12px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.09em;transition:.4s}
+.chip.obs{background:rgba(80,230,150,.13);color:#58e6a0;border:1px solid rgba(80,230,150,.45)}
+.chip.fc{background:rgba(255,122,40,.16);color:#ffa05c;border:1px solid rgba(255,122,40,.55)}
+.chip.map{background:rgba(95,212,255,.12);color:var(--acc);border:1px solid rgba(95,212,255,.4)}
+.bignum b{font-size:50px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums}.bignum span{margin-left:8px;color:var(--mut);font-size:13px}
+.thtext{margin:0;font-size:13.5px;line-height:1.55;min-height:62px}
+#thTabs{display:flex;gap:6px}#thTabs .btn{flex:1;padding:6px 2px;font-size:11.5px}
+.thtrackw{position:relative;height:26px}
+#thTrack{position:absolute;left:0;right:0;top:9px;height:8px;border-radius:6px;overflow:hidden;display:flex}
+.seg.o{background:linear-gradient(90deg,#17408f,#5fd4ff)}.seg.f{background:repeating-linear-gradient(135deg,#ff7a28 0 6px,#ffb070 6px 12px)}
+#thS{position:absolute;inset:0;width:100%;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer}
+#thS::-webkit-slider-runnable-track{background:transparent;height:26px}#thS::-moz-range-track{background:transparent}
+#thS::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:4px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(95,212,255,.35)}
+#thS::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(95,212,255,.35)}
+.thlabels{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mut);margin-top:-2px}
+#thChart{width:100%;height:96px;display:block}
+@media(max-width:900px){.thbox{flex-direction:column;overflow:auto;align-items:stretch;gap:14px}.thside{width:auto;max-height:none}#tc{align-self:center}}
+@media(prefers-reduced-motion:reduce){#th,.thbox,.chip{transition:none}.pbar.ind i{animation:none}}
 @media(min-width:761px){#time{left:calc(50% - 165px);width:min(720px,calc(100vw - 378px))}}   /* keep clear of the 330px side panel */
 @media(max-width:760px){#side{bottom:118px;max-height:44vh}#head{padding:10px 12px}}   /* declared last so it beats the generic #side max-height */
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -112,6 +157,21 @@ select,.rng{font:inherit;color:var(--ink);background:rgba(95,212,255,.08);border
       </div>
       <p class="note">Source: NASA GIBS · OPERA DSWx-S1 &amp; RTC-S1 (NASA JPL), contains modified Copernicus Sentinel data (ESA). SAR and Water modes show NASA’s rendering unmodified; Change is computed from consecutive NASA water maps on pixels valid in both. Frames use ~58 m pixels; compare only like-for-like geometry (same orbit track) for the most reliable change.</p>
     </div>
+    <div class="card" id="fc">
+      <h3>🔮 What will the water look like next?</h3>
+      <p class="note" style="margin:0 0 8px">We study real NASA satellite pictures of this place, learn when and where water appears, and predict the coming months.</p>
+      <div class="row"><select id="fcLook" aria-label="How much history to learn from"><option value="365">Learn from 1 year</option><option value="730" selected>Learn from 2 years</option><option value="1095">Learn from 3 years (best)</option></select>
+        <select id="fcHor" aria-label="How far ahead to predict"><option value="48">Predict 2 months</option><option value="96" selected>Predict 3 months</option><option value="192">Predict 6 months</option><option value="365">Predict 1 year</option></select></div>
+      <div class="row"><button class="btn primary" id="fcGo">✨ Show me the future</button></div>
+      <div class="pbar" id="fcBarW" hidden><i id="fcBar"></i></div>
+      <div id="fcProg" class="note"></div>
+      <div id="fcOut" hidden>
+        <button class="btn primary" id="fcWatch" style="width:100%;margin:6px 0 4px">▶ Watch the time-lapse</button>
+        <div id="fcPlain"></div>
+        <canvas id="fcChart" style="width:100%;height:120px;display:block;margin-top:8px" aria-label="Chart of water over time"></canvas>
+        <details><summary>Technical details (for scientists)</summary><div id="fcModel"></div></details>
+      </div>
+    </div>
     <div class="kpi kpi3"><div>Acquisitions<b id="k1">–</b></div><div>Avg revisit<b id="k2">–</b></div><div>Span<b id="k3">–</b></div></div>
     <canvas id="chart"></canvas>
     <div class="card" id="between"></div>
@@ -128,6 +188,24 @@ select,.rng{font:inherit;color:var(--ink);background:rgba(95,212,255,.08);border
 </div>
 <div id="hint">Drag to rotate · scroll to zoom · click a marker</div>
 
+<div id="th" role="dialog" aria-modal="true" aria-label="Time-lapse of water over time">
+ <div class="thbox">
+  <canvas id="tc"></canvas>
+  <div class="thside">
+    <div class="thhead"><div><div class="sub" id="thSite"></div><div id="thDate" class="bigdate"></div></div><button class="btn" id="thClose" aria-label="Close time-lapse">✕</button></div>
+    <div><span id="thChip" class="chip"></span></div>
+    <div class="bignum"><b id="thBig">–</b><span id="thUnit"></span></div>
+    <p id="thText" class="thtext"></p>
+    <div id="thTabs"><button class="btn on" data-m="seq">Time-lapse</button><button class="btn" data-m="cls">Water zones</button><button class="btn" data-m="trend">Changing areas</button></div>
+    <div class="leg" id="thLeg"></div>
+    <div id="thTl"><div class="thtrackw"><div id="thTrack"><div class="seg o" id="segO"></div><div class="seg f" id="segF"></div></div><input type="range" id="thS" min="0" max="0" step="0.01" value="0" aria-label="Move through time"></div>
+    <div class="thlabels"><span>Real satellite pictures</span><span>Prediction</span></div></div>
+    <div class="row"><button class="btn primary" id="thPlay" aria-label="Play or pause" style="flex:0 0 58px">❚❚</button><select id="thSpeed" aria-label="Speed"><option value=".6">Slow</option><option value="1" selected>Normal</option><option value="2">Fast</option></select></div>
+    <canvas id="thChart" aria-label="Water over time"></canvas>
+    <p class="note">Space = play / pause · ← → = step · Esc = close</p>
+  </div>
+ </div>
+</div>
 <script src="vendor/three.min.js"></script>
 <script>
 const API_BASE = location.protocol==='file:' ? 'http://127.0.0.1:8000' : '';
@@ -256,13 +334,13 @@ const bboxCenter=b=>[(b.s+b.n)/2,(b.w+b.e)/2];
 
 function selectSite(s){
   if(!s)return;
-  stop();resetFrames('');S.site=s;$('sites').value=s.id;$('sname').innerHTML=`${esc(s.name)}<span class="tag">${esc(s.country||'')}</span>`;
+  stop();resetFrames('');resetFC();S.site=s;$('sites').value=s.id;$('sname').innerHTML=`${esc(s.name)}<span class="tag">${esc(s.country||'')}</span>`;
   $('about').textContent=(s.kind?s.kind+' — ':'')+(s.about||'');setPatch(s.b);
   $('side').classList.add('show');$('time').classList.remove('show');$('body').hidden=true;
   $('goto').hidden=true;$('back').hidden=false;$('hint').style.opacity=0;$('note').textContent='';
   flyTo(s.lat,s.lon,siteDist(s.b));loadTimeline(s);
 }
-function leave(){S.site=null;stop();resetFrames('');$('side').classList.remove('show');$('time').classList.remove('show');$('goto').hidden=false;$('back').hidden=true;$('hint').style.opacity=1;S.tgt={yaw:S.yaw,pitch:22*D2R,dist:3.6};}
+function leave(){S.site=null;stop();resetFrames('');resetFC();$('side').classList.remove('show');$('time').classList.remove('show');$('goto').hidden=false;$('back').hidden=true;$('hint').style.opacity=1;S.tgt={yaw:S.yaw,pitch:22*D2R,dist:3.6};}
 $('goto').onclick=()=>{if(!SITES.length){$('note').textContent='Sites are not loaded yet — is the backend running?';loadSites();return;}selectSite(SITES.find(s=>s.id===$('sites').value)||SITES[0]);};
 $('sites').onchange=()=>{if(S.site)selectSite(SITES.find(s=>s.id===$('sites').value));};
 $('back').onclick=leave;
@@ -287,16 +365,51 @@ async function loadTimeline(s){
 
 /* ---------- drawing ---------- */
 const mx=mapCv.getContext('2d'), mapTex=new THREE.CanvasTexture(mapCv); mapTex.anisotropy=8; patch.material.map=mapTex;patch.material.needsUpdate=true;
+/* Site map: NASA true-colour imagery underneath (GIBS), thin outlines for every pass in range, only the
+   selected pass filled. (v0.6.0 filled every footprint, so large NISAR scenes stacked into one solid slab.) */
+const HIDE={},MAPBG=new Map(),day0Of=a=>a.time.slice(0,10);let mapBgKey='';
+function mapBg(){
+  const s=S.site,a=TL[ib];if(!s||!a)return null;
+  const day0=a.time.slice(0,10),key=s.id+'|'+Math.floor(D(day0Of(a)).getTime()/(30*day));mapBgKey=key;
+  if(MAPBG.has(key))return MAPBG.get(key)||null;
+  if(MAPBG.size>30)MAPBG.delete(MAPBG.keys().next().value);
+  MAPBG.set(key,null);
+  (async()=>{
+    for(let k=0;k<4;k++){                       // today's MODIS mosaic may not exist yet: step back a few days
+      const d=new Date(D(day0).getTime()-k*day).toISOString().slice(0,10),im=await loadImage(gibsUrl('true',s,d));
+      if(im){MAPBG.set(key,im);if(mapBgKey===key&&S.site===s&&!(fcActive&&FC)&&!(FR.length&&!loading))drawMap();return;}
+    }
+    MAPBG.set(key,false);
+  })();
+  return null;
+}
 function drawMap(){
   const b=S.site.b,W=mapCv.width,X=lon=>(lon-b.w)/(b.e-b.w)*W,Y=lat=>(b.n-lat)/(b.n-b.s)*W;
-  mx.clearRect(0,0,W,W);mx.fillStyle='rgba(4,12,22,.55)';mx.fillRect(0,0,W,W);
+  mx.save();mx.clearRect(0,0,W,W);mx.fillStyle='#07101b';mx.fillRect(0,0,W,W);
+  mx.imageSmoothingEnabled=true;mx.imageSmoothingQuality='high';
+  const bg=mapBg();if(bg){mx.drawImage(bg,0,0,W,W);mx.fillStyle='rgba(4,10,18,.30)';mx.fillRect(0,0,W,W);}
+  mx.strokeStyle='rgba(180,220,255,.13)';mx.lineWidth=1;
+  for(let k=1;k<4;k++){const p=W*k/4;mx.beginPath();mx.moveTo(p,0);mx.lineTo(p,W);mx.moveTo(0,p);mx.lineTo(W,p);mx.stroke();}
   const path=f=>{mx.beginPath();f.forEach(([lo,la],i)=>i?mx.lineTo(X(lo),Y(la)):mx.moveTo(X(lo),Y(la)));mx.closePath();};
-  for(let i=ia;i<=ib;i++){const a=TL[i];if(!a.footprint.length)continue;path(a.footprint);mx.fillStyle=pcol(a.platform)+'1a';mx.fill();}
+  mx.lineWidth=Math.max(1.2,W/450);let n=0;
+  for(let i=ia;i<=ib;i++){const a=TL[i];if(!a.footprint.length||HIDE[a.platform])continue;n++;path(a.footprint);mx.strokeStyle=pcol(a.platform)+'40';mx.stroke();}
   const cur=TL[ib];
-  if(cur&&cur.footprint.length){path(cur.footprint);mx.fillStyle=pcol(cur.platform)+'55';mx.fill();mx.lineWidth=5;mx.strokeStyle=pcol(cur.platform);mx.stroke();}
-  mx.strokeStyle='rgba(255,255,255,.35)';mx.lineWidth=1;mx.setLineDash([6,6]);mx.strokeRect(1,1,W-2,W-2);mx.setLineDash([]);
-  mx.fillStyle='#fff';mx.beginPath();mx.arc(W/2,W/2,5,0,7);mx.fill();
-  mapTex.needsUpdate=true;
+  if(cur&&cur.footprint.length&&!HIDE[cur.platform]){path(cur.footprint);mx.fillStyle=pcol(cur.platform)+'30';mx.fill();
+    mx.lineWidth=Math.max(2.5,W/190);mx.strokeStyle=pcol(cur.platform);mx.stroke();}
+  // scale bar
+  const kmW=(b.e-b.w)*111.32*Math.cos((b.n+b.s)/2*D2R),nice=[50,20,10,5,2,1].find(v=>v<=kmW*.3)||1,len=nice/kmW*W,pad=W/45;
+  mx.fillStyle='#fff';mx.strokeStyle='#fff';mx.lineWidth=3;mx.font=`600 ${Math.round(W/36)}px system-ui,sans-serif`;mx.textBaseline='bottom';mx.textAlign='right';
+  mx.shadowColor='rgba(0,0,0,.8)';mx.shadowBlur=6;mx.beginPath();mx.moveTo(W-pad-len,W-pad-W/30);mx.lineTo(W-pad-len,W-pad-W/60);mx.lineTo(W-pad,W-pad-W/60);mx.lineTo(W-pad,W-pad-W/30);mx.stroke();
+  mx.fillText(nice+' km',W-pad,W-pad-W/36*.9);
+  // caption chip
+  mx.shadowBlur=0;mx.textAlign='left';mx.textBaseline='middle';
+  const label=`${n} pass${n===1?'':'es'} in range`+(cur?` · latest ${fmt(cur.time)}`:'')+(bg?'':' · loading NASA imagery…'),fs=Math.round(W/34);
+  mx.font=`600 ${fs}px system-ui,sans-serif`;const tw=mx.measureText(label).width+fs*1.6,bh=fs*1.9;
+  mx.fillStyle='rgba(5,11,20,.78)';mx.beginPath();mx.roundRect?mx.roundRect(pad,pad,tw,bh,bh/2):mx.rect(pad,pad,tw,bh);mx.fill();
+  mx.fillStyle='#e6f1f8';mx.fillText(label,pad+fs*.8,pad+bh/2+1);
+  // site centre
+  mx.strokeStyle='#fff';mx.lineWidth=2.5;mx.beginPath();mx.arc(W/2,W/2,W/90,0,7);mx.stroke();mx.fillStyle='#fff';mx.beginPath();mx.arc(W/2,W/2,W/260,0,7);mx.fill();
+  mx.restore();mapTex.needsUpdate=true;
 }
 function drawChart(){
   const cv=$('chart'),dpr=devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;if(!w)return;
@@ -318,7 +431,7 @@ function drawInfo(){
   const geo=[...new Set(sel.map(x=>x.direction).filter(Boolean))],paths=[...new Set(sel.map(x=>x.path).filter(v=>v!=null))];
   const tAll=(D(TL[TL.length-1].time)-D(TL[0].time))/day,gAll=TL.length>1?tAll/(TL.length-1):null;
   $('k1').textContent=TL.length;$('k2').textContent=gAll?gAll.toFixed(1)+' d':'–';$('k3').textContent=Math.round(tAll)+' d';
-  $('leg').innerHTML=Object.keys(PLAT).map(p=>`<span><i style="background:${PLAT[p]}"></i>${p}</span>`).join('')+'<span><i style="background:#fff"></i>site centre</span>';
+  $('leg').innerHTML=Object.keys(PLAT).map(p=>`<span data-p="${p}" title="Click to show / hide" style="cursor:pointer;opacity:${HIDE[p]?.35:1}"><i style="background:${PLAT[p]}"></i>${p}</span>`).join('')+'<span><i style="background:#fff"></i>site centre</span><span style="opacity:.6">(click a satellite to hide it)</span>';
   $('between').innerHTML=`<h3>Between ${fmt(A.time)} and ${fmt(B.time)}</h3><dl>`+
     row('Interval',days.toFixed(days%1?1:0)+' days')+row('Acquisitions',n+' ('+Object.entries(cnt).map(([k,v])=>v+' '+k).join(', ')+')')+
     row('Mean revisit',avg!=null?avg.toFixed(1)+' days':'–')+row('Longest gap',gaps.length?Math.max(...gaps).toFixed(0)+' days':'–')+
@@ -329,7 +442,8 @@ function drawInfo(){
     (safeUrl(B.url)?`<dt>Data</dt><dd><a href="${safeUrl(B.url)}" target="_blank" rel="noopener noreferrer">Download from ASF</a></dd>`:'')+'</dl>';
   $('da').textContent=fmt(A.time);$('db').textContent=fmt(B.time);$('sa').value=ia;$('sb').value=ib;
 }
-function drawAll(){(FR.length&&!loading&&FR[fi])?renderFrame():drawMap();drawChart();drawInfo();}
+$('leg').addEventListener('click',e=>{const sp=e.target.closest('[data-p]');if(!sp||!S.site||!TL.length)return;HIDE[sp.dataset.p]=!HIDE[sp.dataset.p];fcActive=false;drawAll();});
+function drawAll(){fcActive&&FC?paintPatch():(FR.length&&!loading&&FR[fi])?renderFrame():drawMap();drawChart();drawInfo();}
 function invalidate(){ if(!FR.length&&!loading)return; resetFrames('Period changed — press “Load frames” to rebuild the animation.'); }
 $('sa').oninput=e=>{ia=Math.min(+e.target.value,ib);invalidate();drawAll();};
 $('sb').oninput=e=>{ib=Math.max(+e.target.value,ia);invalidate();drawAll();};
@@ -443,10 +557,10 @@ $('bgOpt').onchange=()=>{if(FR.length)$('prog').textContent='Optical context cha
 
 function renderFrame(){
   const f=FR[fi],W=SZ;if(mapCv.width!==W){mapCv.width=mapCv.height=W;}
-  mx.clearRect(0,0,W,W);mx.fillStyle='#050b14';mx.fillRect(0,0,W,W);
+  mx.clearRect(0,0,W,W);mx.fillStyle='#050b14';mx.fillRect(0,0,W,W);mx.imageSmoothingEnabled=true;mx.imageSmoothingQuality='high';
   if(!f||!f.ok){mx.fillStyle='#86a0b3';mx.font='22px system-ui';mx.textAlign='center';mx.fillText('No NASA SAR data for this date',W/2,W/2);mx.textAlign='start';mapTex.needsUpdate=true;return;}
   if(fmode==='sar'){if(f.rtc)mx.drawImage(f.rtc,0,0,W,W);}
-  else if(fmode==='wtr'){if(f.base)mx.drawImage(f.base,0,0,W,W);if(f.wtr)mx.drawImage(f.wtr,0,0,W,W);}
+  else if(fmode==='wtr'){if(f.base)mx.drawImage(f.base,0,0,W,W);else if(f.rtc){mx.filter='grayscale(1) brightness(.85)';mx.drawImage(f.rtc,0,0,W,W);mx.filter='none';}if(f.wtr)mx.drawImage(f.wtr,0,0,W,W);}
   else{
     if(f.base){mx.globalAlpha=.55;mx.drawImage(f.base,0,0,W,W);mx.globalAlpha=1;}
     if(f.chg){const id=octx.createImageData(W,W),d=id.data,cc=f.chg.cc;
@@ -461,6 +575,7 @@ function renderFrame(){
 const LEGF={sar:[['#9aa7b4','Backscatter (NASA RTC-S1 false colour)']],wtr:[['#1648ff','Open water'],['#27c25a','Inundated vegetation'],['#aab4bd','Masked']],chg:[['#ff3b30','New water'],['#ffd23f','Water lost'],['#3aa0ff','Unchanged water']]};
 const km=v=>v>=100?v.toFixed(0):v.toFixed(1);
 function showFrame(){
+  fcActive=false;
   const f=FR[fi];if(!f)return;$('fs').value=fi;$('fd').textContent=fmt(f.date);
   $('fleg').innerHTML=LEGF[fmode].map(l=>`<span><i style="background:${l[0]}"></i>${l[1]}</span>`).join('');
   const sensors=[...new Set(f.acqs.map(a=>`${a.platform||'S1'} ${(a.direction||'').slice(0,4).toLowerCase()||''} · track ${a.path??'–'}`))].map(esc).join('<br>');
@@ -488,6 +603,226 @@ function drawFChart(){
   c.fillStyle='#86a0b3';c.font='10px system-ui';c.fillText('surface water km² (open + inundated veg.) · hollow = partial swath',8,h-5);
   c.fillText(Math.round(mx2/1.15)+' km²',w-52,12);
 }
+
+/* ====================================================================
+   Surface forecast + time-lapse theatre (backend: POST /api/forecast, GET /api/forecast/{job}).
+   Observed frames = NASA OPERA via GIBS on one grid. Forecast frames = statistical prediction,
+   always drawn with a different palette, an orange dashed border and a "PREDICTION" banner.
+   The theatre cross-fades between frames on a requestAnimationFrame clock for smooth motion.
+   ==================================================================== */
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const REDUCED2=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let FC=null,fcActive=false,fcTok=0,FCI=null;
+const TH={open:false,pos:0,playing:false,speed:1,mode:'seq',raf:0,last:0,hold:0,k:-1,mode0:'',drag:false};
+const longDate=t=>D(t).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'});
+const dataImg=u=>new Promise(r=>{if(typeof u!=='string'||!u.startsWith('data:image/png;base64,'))return r(null);const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=u;});
+const MONTH=doy=>doy==null?'–':new Date(Date.UTC(2001,0,1+Math.round(doy))).toLocaleDateString('en-GB',{day:'numeric',month:'long',timeZone:'UTC'});
+const PLAIN={
+  cls:[['#1648ff','Water all year round'],['#ffb840','Floods, then dries out each year'],['#8fd3ff','Wet only now and then'],['#2a3340','Almost always dry']],
+  trend:[['#19e3ff','Getting wetter over the years'],['#ff8c32','Getting drier over the years']],
+  obs:[['#2f8cff','Water the satellite saw'],['rgba(0,0,0,.55)','Not seen by the satellite that day']],
+  fc:[['#8fe1ff','Might be under water'],['#143cff','Very likely under water'],['rgba(0,0,0,.55)','Outside the studied area']]};
+
+function resetFC(){fcTok++;closeTheatre(true);FC=null;fcActive=false;FCI=null;$('fcOut').hidden=true;$('fcProg').textContent='';$('fcBarW').hidden=true;$('fcGo').disabled=false;}
+function setBar(frac,indet){const w=$('fcBarW');w.hidden=false;w.classList.toggle('ind',!!indet);$('fcBar').style.width=indet?'':Math.round(clamp(frac,0,1)*100)+'%';}
+$('fcGo').onclick=async()=>{
+  const s=S.site;if(!s)return;resetFC();stop();const tok=fcTok;
+  $('fcGo').disabled=true;$('fcProg').textContent='Contacting NASA…';setBar(.03);
+  try{
+    const q=`site=${encodeURIComponent(s.id)}&lookback_days=${$('fcLook').value}&horizon_days=${$('fcHor').value}`;
+    const j=await api('/api/forecast?'+q,{method:'POST'});
+    for(;;){
+      if(tok!==fcTok)return;
+      const st=await api('/api/forecast/'+encodeURIComponent(j.job));
+      if(tok!==fcTok)return;
+      if(st.state==='done'){$('fcProg').textContent='Preparing the time-lapse…';setBar(.97);await showFC(st.result,tok);break;}
+      const p=st.progress||{};
+      if(/^Fetching/.test(p.stage||'')){$('fcProg').textContent=`Step 1 of 2 · Downloading real NASA satellite pictures (${p.done}/${p.total})… the first run can take a minute.`;setBar(.05+.8*(p.total?p.done/p.total:0));}
+      else{$('fcProg').textContent='Step 2 of 2 · Finding patterns and predicting the future…';setBar(1,true);}
+      await new Promise(r=>setTimeout(r,1000));
+    }
+  }catch(e){if(tok===fcTok){$('fcProg').textContent='Sorry, that did not work: '+e.message;$('fcBarW').hidden=true;}}
+  finally{if(tok===fcTok)$('fcGo').disabled=false;}
+};
+
+async function showFC(res,tok){
+  const m=res.patterns.maps;
+  const [ctx,cls,trend,obs,fc]=await Promise.all([dataImg(m.context),dataImg(m.classes),dataImg(m.trend),
+    Promise.all(res.frames.observed.map(f=>dataImg(f.png))),Promise.all(res.frames.forecast.map(f=>dataImg(f.png)))]);
+  if(tok!==fcTok)return;
+  FCI={ctx,cls,trend,obs,fc};FC=res;
+  FC.seq=[...res.frames.observed.map((f,i)=>({k:'obs',f,i})),...res.frames.forecast.map((f,i)=>({k:'fc',f,i}))];
+  const good=res.frames.observed.filter(f=>f.cover>=.5&&f.water_pct!=null);
+  FC.last=good.length?good[good.length-1]:res.frames.observed[res.frames.observed.length-1];
+  TH.pos=FC.seq.length-1-res.frames.forecast.length;TH.mode='seq';fcActive=true;
+  const d=res.data;
+  $('fcProg').textContent=`Learned from ${d.dates_used} real satellite pictures (${fmt(d.first)} → ${fmt(d.last)}).`;
+  $('fcBarW').hidden=true;$('fcOut').hidden=false;
+  plainCard();drawChart2($('fcChart'),null);paintPatch();
+  openTheatre();
+}
+
+/* ---------- plain-language summary ---------- */
+function plainCard(){
+  const s=FC.patterns.summary,M=s.modelled_km2||1,pc=v=>Math.round(v/M*100),m=FC.model,F=FC.frames.forecast,d=FC.data;
+  const L=[];
+  L.push(`<li><b>${pc(s.permanent)}%</b> of this area is under water almost all year — rivers, lakes or wetlands.</li>`);
+  if(s.seasonal>.01*M)L.push(`<li><b>${pc(s.seasonal)}%</b> fills up and dries out with the seasons`+(s.site_peak_day_of_year!=null?`, usually wettest around <b>${MONTH(s.site_peak_day_of_year)}</b>`:'')+'.</li>');
+  if(s.intermittent>.01*M)L.push(`<li><b>${pc(s.intermittent)}%</b> is only wet now and then — the flood-prone ground.</li>`);
+  if(s.gaining_km2>.005*M||s.drying_km2>.005*M)L.push(`<li>Over the years, <b>${pc(s.gaining_km2)}%</b> has been getting wetter and <b>${pc(s.drying_km2)}%</b> drier.</li>`);
+  const pl=FC.patterns.pulses||[];
+  if(pl.length)L.push(`<li>Unusually high water was seen on ${pl.slice(-3).map(x=>`<b>${esc(fmt(x))}</b>`).join(', ')}.</li>`);
+  let next='';
+  if(F.length){const top=F.reduce((a,b)=>b.water_pct>a.water_pct?b:a),lo=Math.min(...F.map(f=>f.water_pct)),last=FC.last&&FC.last.water_pct;
+    next=`<p class="trust"><b>What we expect:</b> over the next ${F[F.length-1].lead_days} days, water should cover roughly <b>${Math.round(lo)}–${Math.round(top.water_pct)}%</b> of the area, highest around <b>${esc(fmt(top.date))}</b>.`+(last!=null?` The last real picture (${esc(fmt(FC.last.date))}) showed ${Math.round(last)}%.`:'')+'</p>';}
+  const bt=m.backtest,mm=bt&&bt.models,acc=mm&&mm[m.chosen]&&mm[m.chosen].accuracy,accP=mm&&mm.persistence&&mm.persistence.accuracy;
+  let trust=`<p class="trust"><span class="pill2 ${m.reliable?'ok':'lo'}">${m.reliable?'REASONABLY RELIABLE':'TREAT WITH CAUTION'}</span>`;
+  trust+=bt&&acc!=null?`We hid the ${bt.n_test} most recent real pictures, predicted them, and checked. The forecast got <b>${Math.round(acc*100)}%</b> of the map right`+(accP!=null?`, compared with ${Math.round(accP*100)}% for simply assuming “nothing changes”.`:'.'):'There were too few pictures to test the forecast against real data.';
+  trust+=` It is an educated guess from past patterns and cannot foresee unusual storms or dam releases.`;
+  if(d.span_days<300)trust+=' With under a year of pictures it cannot learn the yearly cycle, so this prediction is basic.';
+  trust+='</p>';
+  $('fcPlain').innerHTML=`<ul class="plain">${L.join('')}</ul>${next}${trust}`;
+  let t='';
+  if(bt){const names={climatology:'Average (baseline)',persistence:'Same as last time (baseline)'},mm2=bt.models;
+    t=`<table class="tbl"><tr><th>Method</th><th>Error ↓</th><th>Pixels right</th><th>Water overlap</th></tr>`+Object.keys(mm2).map(k=>`<tr class="${k===m.chosen?'best':''}"><td>${esc(names[k]||k)}${k===m.chosen?' ✓':''}</td><td>${mm2[k].brier.toFixed(3)}</td><td>${(mm2[k].accuracy*100).toFixed(1)}%</td><td>${mm2[k].csi_water==null?'–':mm2[k].csi_water.toFixed(2)}</td></tr>`).join('')+`</table>
+      <p class="note">Trained on the first ${bt.n_train} real dates, scored on the latest ${bt.n_test}. “Error” is the Brier score; “Water overlap” is the critical success index.</p>`;}
+  $('fcModel').innerHTML=`<p class="note" style="margin:6px 0 0">${esc(m.description)} Chosen: <b>${esc(m.chosen)}</b>.</p>${t}${(m.notes||[]).map(n=>`<p class="note">${esc(n)}</p>`).join('')}`;
+}
+
+/* ---------- drawing one (cross-faded) scene ---------- */
+function drawScene(c,w,pos,now){
+  const n=FC.seq.length;pos=clamp(pos,0,n-1);const i=Math.floor(pos),j=Math.min(i+1,n-1),f=pos-i;
+  const e=REDUCED2?Math.round(f):f*f*(3-2*f);
+  c.save();c.fillStyle='#050b14';c.fillRect(0,0,w,w);
+  c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
+  if(FCI.ctx)c.drawImage(FCI.ctx,0,0,w,w);
+  const blur=Math.max(1,w/380);
+  const lay=(img,a)=>{if(!img||a<=.004)return;c.globalAlpha=a;c.filter=`blur(${blur}px)`;c.drawImage(img,0,0,w,w);c.filter='none';c.globalAlpha=1;};
+  const A=FC.seq[i],B=FC.seq[j],pick=q=>q.k==='obs'?FCI.obs[q.i]:FCI.fc[q.i];
+  let mix=0,label,dateMs=D(A.f.date).getTime()+(D(B.f.date).getTime()-D(A.f.date).getTime())*e;
+  if(TH.mode==='seq'){
+    lay(pick(A),1-e);if(j!==i)lay(pick(B),e);
+    mix=(A.k==='fc'?1-e:0)+(j!==i&&B.k==='fc'?e:0);
+    label=mix>.5?'◆  PREDICTION · not a photo':'●  REAL SATELLITE PICTURE';
+  }else{lay(TH.mode==='cls'?FCI.cls:FCI.trend,1);label=TH.mode==='cls'?'WHERE WATER TENDS TO BE':'WHERE THINGS ARE CHANGING';}
+  const g=c.createRadialGradient(w/2,w/2,w*.36,w/2,w/2,w*.78);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.42)');c.fillStyle=g;c.fillRect(0,0,w,w);
+  if(!REDUCED2&&TH.playing&&c.createConicGradient){
+    const cg=c.createConicGradient(((now||0)/2800)%(2*Math.PI),w/2,w/2);
+    cg.addColorStop(0,'rgba(95,212,255,0)');cg.addColorStop(.86,'rgba(95,212,255,0)');cg.addColorStop(.995,'rgba(95,212,255,.15)');cg.addColorStop(1,'rgba(95,212,255,0)');
+    c.globalCompositeOperation='screen';c.fillStyle=cg;c.fillRect(0,0,w,w);c.globalCompositeOperation='source-over';}
+  const fs=Math.round(w/30),pad=Math.round(w/60);c.font=`700 ${fs}px system-ui,sans-serif`;c.textBaseline='middle';
+  const tw=c.measureText(label).width+pad*2.4,bh=fs*1.9,r=bh/2,x0=pad,y0=pad;
+  c.fillStyle=`rgba(${Math.round(8+247*mix)},${Math.round(16+106*mix)},${Math.round(28+12*mix)},${.82+.12*mix})`;
+  c.beginPath();c.roundRect?c.roundRect(x0,y0,tw,bh,r):c.rect(x0,y0,tw,bh);c.fill();
+  c.fillStyle=mix>.5?'#1d0e00':'#e6f1f8';c.fillText(label,x0+pad*1.2,y0+bh/2+1);
+  const ds=longDate(dateMs);c.font=`600 ${Math.round(fs*.95)}px system-ui,sans-serif`;const dw=c.measureText(ds).width+pad*2.2,dh=fs*1.7;
+  c.fillStyle='rgba(5,11,20,.78)';c.beginPath();c.roundRect?c.roundRect(pad,w-pad-dh,dw,dh,dh/2):c.rect(pad,w-pad-dh,dw,dh);c.fill();
+  c.fillStyle='#e6f1f8';c.fillText(ds,pad*2.1,w-pad-dh/2+1);
+  if(mix>.01){c.strokeStyle=`rgba(255,122,40,${.95*mix})`;c.lineWidth=Math.max(3,w/150);c.setLineDash([w/45,w/80]);c.strokeRect(c.lineWidth/2+1,c.lineWidth/2+1,w-c.lineWidth-2,w-c.lineWidth-2);c.setLineDash([]);}
+  c.restore();return{i,j,e,mix,dateMs};
+}
+function paintPatch(){if(!FC||!FCI)return;if(mapCv.width<512)mapCv.width=mapCv.height=768;const m0=TH.mode;drawScene(mx,mapCv.width,TH.pos,0);mapTex.needsUpdate=true;}
+
+/* ---------- chart (card + theatre) ---------- */
+function drawChart2(cv,info){
+  const dpr=devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;if(!w||!FC)return;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+  const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,w,h);
+  const ts=FC.patterns.timeseries.filter(t=>t.water_pct!=null),fc=FC.frames.forecast,M=FC.data.modelled_km2;if(!ts.length)return;
+  const pct=k=>k/M*100,top=Math.max(...ts.map(t=>t.water_pct),...fc.map(f=>pct(f.high_km2)),1)*1.12;
+  const t0=D(ts[0].date).getTime(),t1=D(fc.length?fc[fc.length-1].date:ts[ts.length-1].date).getTime(),sp=Math.max(t1-t0,1);
+  const X=d=>10+((typeof d==='number'?d:D(d).getTime())-t0)/sp*(w-20),base=h-18,Y=v=>base-v/top*(base-10);
+  c.strokeStyle='rgba(120,190,230,.2)';c.lineWidth=1;c.beginPath();c.moveTo(8,base);c.lineTo(w-8,base);c.stroke();
+  if(fc.length){const l=ts[ts.length-1],a=[{date:l.date,lo:l.water_pct,hi:l.water_pct,v:l.water_pct},...fc.map(f=>({date:f.date,lo:pct(f.low_km2),hi:pct(f.high_km2),v:f.water_pct}))];
+    c.fillStyle='rgba(255,122,40,.2)';c.beginPath();a.forEach((p,k)=>k?c.lineTo(X(p.date),Y(p.hi)):c.moveTo(X(p.date),Y(p.hi)));[...a].reverse().forEach(p=>c.lineTo(X(p.date),Y(p.lo)));c.closePath();c.fill();
+    c.strokeStyle='#ff8a3d';c.lineWidth=2;c.setLineDash([6,4]);c.beginPath();a.forEach((p,k)=>k?c.lineTo(X(p.date),Y(p.v)):c.moveTo(X(p.date),Y(p.v)));c.stroke();c.setLineDash([]);}
+  c.strokeStyle='#5fd4ff';c.lineWidth=1.6;c.beginPath();ts.forEach((p,k)=>k?c.lineTo(X(p.date),Y(p.water_pct)):c.moveTo(X(p.date),Y(p.water_pct)));c.stroke();
+  ts.forEach(p=>{c.beginPath();c.arc(X(p.date),Y(p.water_pct),2.6,0,7);if(p.cover>=.5){c.fillStyle='#5fd4ff';c.fill();}else{c.strokeStyle='#ffb840';c.lineWidth=1.2;c.stroke();}});
+  if(info){const x=X(info.dateMs);c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=1.5;c.beginPath();c.moveTo(x,4);c.lineTo(x,base);c.stroke();c.fillStyle='#fff';c.beginPath();c.arc(x,4,3.5,0,7);c.fill();}
+  c.fillStyle='#86a0b3';c.font='10px system-ui';c.textBaseline='alphabetic';c.fillText('Share of the area under water · blue: real pictures · orange: prediction (shaded = likely range)',8,h-5);
+}
+
+/* ---------- theatre ---------- */
+function sizeStage(){
+  const tc=$('tc'),dpr=Math.min(devicePixelRatio||1,2),wide=innerWidth>900;
+  const S=Math.max(240,Math.floor(wide?Math.min(innerHeight*.88,innerWidth-330-110):Math.min(innerWidth-32,innerHeight*.52)));
+  tc.style.width=tc.style.height=S+'px';const px=Math.min(1100,Math.round(S*dpr));if(tc.width!==px)tc.width=tc.height=px;
+}
+function setPlayBtn(){$('thPlay').textContent=TH.playing?'❚❚':'▶';}
+function legendFor(q){return TH.mode==='cls'?PLAIN.cls:TH.mode==='trend'?PLAIN.trend:(q&&q.k==='fc'?PLAIN.fc:PLAIN.obs);}
+function updateInfo(info){
+  const k=Math.round(TH.pos),q=FC.seq[clamp(k,0,FC.seq.length-1)];
+  $('thDate').textContent=TH.mode==='seq'?longDate(info.dateMs):'Big picture';
+  const key=TH.mode+'|'+k;if(key===TH.k)return;TH.k=key;
+  const chip=$('thChip'),M=FC.data.modelled_km2;
+  $('thLeg').innerHTML=legendFor(q).map(l=>`<span><i style="background:${esc(l[0])}"></i>${esc(l[1])}</span>`).join('');
+  if(TH.mode!=='seq'){
+    const s=FC.patterns.summary,pc=v=>Math.round(v/M*100);chip.className='chip map';chip.textContent='PATTERN MAP';
+    $('thBig').textContent=TH.mode==='cls'?pc(s.permanent+s.seasonal)+'%':pc(s.gaining_km2+s.drying_km2)+'%';
+    $('thUnit').textContent=TH.mode==='cls'?'is regularly under water':'is changing over time';
+    $('thText').textContent=TH.mode==='cls'?'Dark blue stays wet all year. Orange floods and dries out with the seasons. Light blue only gets wet occasionally.':'Cyan areas are slowly getting wetter, orange areas are drying out. Only clear, long-term changes are shown.';
+    return;}
+  const f=q.f;
+  if(q.k==='obs'){chip.className='chip obs';chip.textContent='REAL SATELLITE';
+    $('thBig').textContent=f.water_pct==null?'–':Math.round(f.water_pct)+'%';$('thUnit').textContent='under water';
+    $('thText').textContent='This is what NASA’s satellite actually saw on '+longDate(f.date)+'. Blue is water.'+(f.cover<.8?' The satellite only passed over part of the area that day, so the dimmed part is unknown, not dry.':'');}
+  else{chip.className='chip fc';chip.textContent='PREDICTION';
+    $('thBig').textContent=Math.round(f.water_pct)+'%';$('thUnit').textContent='expected under water';
+    const lo=Math.round(f.low_km2/M*100),hi=Math.round(f.high_km2/M*100),last=FC.last&&FC.last.water_pct;
+    let cmp='';if(last!=null){const dd=f.water_pct-last;cmp=Math.abs(dd)<1?' About the same as the last real picture.':` That is ${Math.abs(Math.round(dd))} points ${dd>0?'more':'less'} than the last real picture (${Math.round(last)}%).`;}
+    $('thText').textContent=`Our best guess for ${longDate(f.date)} — likely between ${lo}% and ${hi}%.${cmp} This is a prediction, not a photo.`;}
+}
+function paint(now){
+  const tc=$('tc'),c=tc.getContext('2d');const info=drawScene(c,tc.width,TH.pos,now);
+  if(!TH.drag)$('thS').value=TH.pos;updateInfo(info);drawChart2($('thChart'),info);
+}
+function loop(now){
+  if(!TH.open){TH.raf=0;return;}
+  TH.raf=requestAnimationFrame(loop);
+  const dt=Math.min(.1,(now-TH.last)/1000);TH.last=now;const n=FC.seq.length,nObs=FC.frames.observed.length;
+  if(TH.playing&&TH.mode==='seq'){
+    if(TH.hold>0)TH.hold-=dt;
+    else{const prev=TH.pos,q=FC.seq[Math.min(Math.floor(prev),n-1)];
+      TH.pos+=2.6*TH.speed*(q.k==='fc'?.65:1)*dt;
+      if(prev<nObs-1&&TH.pos>=nObs-1&&nObs<n){TH.pos=nObs-1;TH.hold=1.2;}      // pause on the last real picture
+      if(TH.pos>=n-1){TH.pos=n-1;TH.playing=false;setPlayBtn();}}
+  }
+  paint(now);
+}
+function openTheatre(){
+  if(!FC||TH.open)return;stop();TH.open=true;TH.mode='seq';TH.k=-1;TH.drag=false;
+  document.querySelectorAll('#thTabs .btn').forEach(x=>x.classList.toggle('on',x.dataset.m==='seq'));
+  const nO=FC.frames.observed.length,nF=FC.frames.forecast.length;
+  $('segO').style.flex=Math.max(nO-1,1);$('segF').style.flex=Math.max(nF,1);
+  $('thS').max=FC.seq.length-1;$('thSite').textContent=S.site?S.site.name:'';
+  $('th').classList.add('show');sizeStage();requestAnimationFrame(()=>$('th').classList.add('vis'));
+  TH.pos=0;TH.playing=true;TH.hold=.7;TH.speed=+$('thSpeed').value||1;setPlayBtn();TH.last=performance.now();
+  $('thClose').focus();if(!TH.raf)TH.raf=requestAnimationFrame(loop);
+}
+function closeTheatre(quiet){
+  if(!TH.open)return;TH.open=false;TH.playing=false;$('th').classList.remove('vis');
+  setTimeout(()=>{if(!TH.open)$('th').classList.remove('show');},quiet?0:480);
+  TH.mode='seq';if(!quiet){TH.pos=FC?FC.seq.length-1-FC.frames.forecast.length:0;paintPatch();$('fcWatch').focus();}
+}
+$('fcWatch').onclick=openTheatre;
+$('thClose').onclick=()=>closeTheatre();
+$('thPlay').onclick=()=>{if(TH.mode!=='seq')return;if(TH.pos>=FC.seq.length-1)TH.pos=0;TH.playing=!TH.playing;TH.hold=0;setPlayBtn();};
+$('thSpeed').onchange=e=>{TH.speed=+e.target.value||1;};
+$('thS').addEventListener('input',e=>{TH.drag=true;TH.playing=false;setPlayBtn();TH.pos=+e.target.value;if(!TH.raf)paint(0);});
+$('thS').addEventListener('change',()=>{TH.drag=false;});
+document.querySelectorAll('#thTabs .btn').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#thTabs .btn').forEach(x=>x.classList.toggle('on',x===b));TH.mode=b.dataset.m;TH.k=-1;
+  if(TH.mode!=='seq'){TH.playing=false;setPlayBtn();}$('thTl').style.opacity=TH.mode==='seq'?1:.35;});
+addEventListener('keydown',e=>{
+  if(!TH.open)return;
+  if(e.key==='Escape'){closeTheatre();}
+  else if(e.key===' '&&e.target.tagName!=='SELECT'&&e.target.tagName!=='BUTTON'){e.preventDefault();$('thPlay').click();}
+  else if(e.key==='ArrowRight'||e.key==='ArrowLeft'){if(TH.mode!=='seq')return;e.preventDefault();TH.playing=false;setPlayBtn();
+    TH.pos=clamp(Math.round(TH.pos)+(e.key==='ArrowRight'?1:-1),0,FC.seq.length-1);}
+});
+addEventListener('resize',()=>{if(TH.open)sizeStage();if(FC&&!$('fcOut').hidden)drawChart2($('fcChart'),null);});
+
+
 addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();if(S.site&&TL.length){drawChart();if(FR.length)drawFChart();}});
 
 api('/api/health').then(h=>{$('pill').className='on';$('pill').lastChild.textContent='backend live'+(h.earthdata_token_configured?' · Earthdata':'');}).catch(()=>{$('pill').lastChild.textContent='backend offline';$('note').textContent='Start the backend (run.sh) so live SAR data can load.';});

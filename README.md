@@ -25,7 +25,11 @@ Pick a site, press **Fly to site**, and the app:
    * **Change** — *computed* new / lost / unchanged water between consecutive valid frames, only on pixels valid in both (clearly labelled as derived).
 3. Reports per-frame coverage, open-water and inundated-vegetation area (km²) and a time-series chart that marks partial-swath frames. Dates with no NASA product are shown as such — **nothing is ever filled in or fabricated**.
 
+4. **Mines surface patterns and forecasts the future surface** (`POST /api/forecast`, new in v0.6) — see below.
+
 The previous Leaflet explorer (`/classic/`) and the HDF5 change-detection API (`POST /api/analyze`) are still included.
+
+**Site map (v0.6.2):** real NASA MODIS imagery as the backdrop, thin outlines for every pass in the chosen range, only the selected pass filled, a scale bar, and a clickable legend to hide a satellite (this fixed large NISAR scenes stacking into a solid slab).
 
 ### Sites
 Prayagraj (India) · Sacramento Valley (USA) · Padma-Meghna Delta (Bangladesh) · Mississippi Delta (USA) · Pantanal (Brazil) · Valencia / Albufera (Spain).
@@ -58,7 +62,25 @@ python -m uvicorn main:app --host 127.0.0.1 --port 8000
 
 Optional: `cp backend/.env.example backend/.env` and set `EARTHDATA_TOKEN` (ASF search is public; a stale token is automatically ignored).
 
-### Tests (30)
+
+## 🔮 Pattern mining & surface forecast (v0.6)
+
+Press **Analyse & forecast** in a site's panel. The backend (`backend/forecast.py`) uses **only NASA data already wired into this app**: ASF DAAC for the Sentinel-1 dates/footprints, and NASA GIBS (Earthdata) for OPERA DSWx-S1 water maps and RTC-S1 backscatter on those dates.
+
+1. **Observed stack** – one common grid (default 256², ≈100 m) of *water / not water / not observed* per date. Pixels outside the swath or masked are *unknown*, never "dry".
+2. **Patterns** – per pixel: water frequency, annual amplitude and peak day, long-term trend with a significance test; classified as permanent / seasonal / intermittent / dry, plus site-level high-water pulses.
+3. **Forecast** – per-pixel regularised logistic regression on annual harmonics (+ optional trend), fitted by vectorised IRLS on observed dates only. The model form is **chosen by a hold-out back-test** on the latest real dates against *climatology* and *persistence*; skill is reported and `reliable=false` is returned (and shown in the UI) if the model does not beat them. Less than ~1 year of data → falls back to climatology and says so.
+4. **Plain-language time-lapse (v0.6.1)** – after analysis a full-screen theatre opens: real satellite frames cross-fade smoothly into the prediction (60 fps `requestAnimationFrame` clock, speed control, scrubber, keyboard: Space / ← → / Esc), with a big date, a one-sentence explanation of every frame, "Water zones" and "Changing areas" maps, and a reliability verdict written for non-scientists. Scientific tables sit under *Technical details*.
+5. **Frames** – observed frames (blue water on a speckle-free backdrop = temporal median of NASA's RTC-S1 rendering, unobserved pixels dimmed) and forecast frames (probability ramp, orange dashed border, banner "FORECAST · model prediction, not an observation"), animated on the 3D globe patch, with a chart of observed history and the forecast ± 80 % range.
+
+| Method | Endpoint | Description |
+|:--|:--|:--|
+| `POST` | `/api/forecast?site=&lookback_days=730&horizon_days=96&grid=256&max_frames=80` | Start a background job → `{job, state}` (identical requests are cached for 3 h) |
+| `GET` | `/api/forecast/{job}` | `state: running` + progress, then `state: done` + `result` (patterns, model skill, observed & forecast frames as PNG data URLs). Upstream failures are `502`, never empty data |
+
+Caveats stated in the UI: forecast bands are calibrated on the back-test and do not widen with lead time; trend significance is pixel-wise and uncorrected for multiple testing; best results need 2–3 years of history.
+
+### Tests
 ```bash
 cd backend
 pip install -r requirements-dev.txt
@@ -88,6 +110,7 @@ The container honours `$PORT` (Render, Railway, Fly, Cloud Run, Heroku-style hos
 | `GET` | `/api/sites` | The six study sites (id, bbox, description) |
 | `GET` | `/api/timeline?site=<id>&start=&end=` | Live ASF acquisitions (Sentinel-1 + NISAR), sorted, de-duplicated, cached 15 min. Default: last 12 months; max 3 years |
 | `GET` | `/api/gibs?layer=rtc\|wtr\|true&bbox=&date=YYYY-MM-DD&size=` | Unmodified NASA GIBS PNG (bbox ≤ 2°). `404` = no imagery that day, `502` = NASA outage |
+| `POST` | `/api/forecast` · `GET /api/forecast/{job}` | Surface-pattern mining + forecast from real OPERA data (see above) |
 | `GET` | `/api/search` | Raw GeoJSON search of ASF DAAC |
 | `POST` | `/api/analyze` | Log-ratio change detection on HDF5 pairs (`sample` / `observed` / `synthetic`) |
 
@@ -104,6 +127,7 @@ The container honours `$PORT` (Render, Railway, Fly, Cloud Run, Heroku-style hos
 │   ├── main.py                     # FastAPI app, routes, static hosting
 │   ├── asf_client.py               # ASF DAAC search + per-site timeline
 │   ├── gibs_client.py              # NASA GIBS WMS proxy (cached)
+│   ├── forecast.py                 # pattern mining + surface forecast (jobs, back-test)
 │   ├── sar_processor.py            # HDF5 reader, log-ratio maths, PNG renderer
 │   ├── create_sample_nisar_pair.py # Reproducible simulated NISAR-format pair
 │   ├── sample_data/  tests/  requirements*.txt  .env.example
